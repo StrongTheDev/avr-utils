@@ -1,20 +1,15 @@
 const vscode = require('vscode');
-const { exec } = require('child_process');
+const { spawn } = require('child_process');
 const path = require('path');
-const util = require('util');
 const fs = require('fs');
 const compileProject = require('./commands/compileProject.js');
-const { selectedDevice } = require('./init'); // From init.js
-const { devices } = require('./utils'); // From utils.js for MCU list
-
-const execPromise = util.promisify(exec);
+const { selectedDevice } = require('./init');
+const { devices, toolchainDir } = require('./utils');
 
 async function uploadToMicrocontroller() {
     try {
-        // Compile the project first
         await compileProject();
 
-        // Get the workspace folder
         const workspaceFolders = vscode.workspace.workspaceFolders;
         if (!workspaceFolders) {
             vscode.window.showErrorMessage('No workspace folder open. Please open a project.');
@@ -22,7 +17,6 @@ async function uploadToMicrocontroller() {
         }
         const workspacePath = workspaceFolders[0].uri.fsPath;
 
-        // Look for the hex file in the Debug directory
         const config = vscode.workspace.getConfiguration('avr-utils');
         const hexDir = config.get('hexFilePath') || 'Debug';
         const hexFilePath = path.join(workspacePath, hexDir, `${workspaceFolders[0].name}.hex`);
@@ -31,18 +25,77 @@ async function uploadToMicrocontroller() {
             return;
         }
 
-        // Get upload parameters with dropdowns
-        const programmer = await getProgrammer();
-        if (!programmer) return;
+        // Load saved programmer settings
+        const projectConfig = loadProjectConfig(workspacePath);
+        const savedSettings = projectConfig.uploadSettings || {};
 
-        const mcu = await getMcu();
-        if (!mcu) return;
+        let programmer, mcu, port;
 
-        const port = await getPort();
-        if (!port) return;
+        // Check if there are saved settings and prompt user
+        if (savedSettings.programmer && savedSettings.mcu && savedSettings.port) {
+            const useSaved = await vscode.window.showQuickPick(
+                [
+                    { label: 'Use Saved Settings', description: `Programmer: ${savedSettings.programmer}, MCU: ${savedSettings.mcu}, Port: ${savedSettings.port}` },
+                    { label: 'Change Settings', description: 'Select new programmer, MCU, and port' }
+                ],
+                { placeHolder: 'Use saved upload settings or change them?', title: 'Upload Settings' }
+            );
 
-        // Build and execute avrdude command
-        const avrdudeCommand = `avrdude -c ${programmer} -p ${mcu} -P ${port} -U flash:w:${hexFilePath}:i`;
+            if (!useSaved) return;
+
+            if (useSaved.label === 'Use Saved Settings') {
+                programmer = savedSettings.programmer;
+                mcu = savedSettings.mcu;
+                port = savedSettings.port;
+            }
+        }
+
+        // If no saved settings or user wants to change them, prompt for new values
+        if (!programmer || !mcu || !port) {
+            programmer = await getProgrammer(savedSettings.programmer);
+            if (!programmer) return;
+
+            mcu = await getMcu(savedSettings.mcu);
+            if (!mcu) return;
+
+            port = await getPort(savedSettings.port);
+            if (!port) return;
+
+            // Save the new settings
+            saveProjectConfig(workspacePath, { uploadSettings: { programmer, mcu, port } });
+        }
+
+        const avrdudeExecutable = process.platform === 'win32' ? 'avrdude.exe' : 'avrdude';
+        let avrdudePath = path.join(toolchainDir(), 'bin', avrdudeExecutable);
+        let useSystemAvrdude = false;
+
+        if (!fs.existsSync(avrdudePath)) {
+            const action = await vscode.window.showWarningMessage(
+                `avrdude not found at ${avrdudePath}. Try using system-installed avrdude?`,
+                'Yes',
+                'Download Toolchain',
+                'Cancel'
+            );
+            if (action === 'Download Toolchain') {
+                await vscode.commands.executeCommand('avr-utils.getToolchain');
+                if (!fs.existsSync(avrdudePath)) {
+                    throw new Error('Toolchain download failed or avrdude is still missing.');
+                }
+            } else if (action === 'Yes') {
+                useSystemAvrdude = true;
+                avrdudePath = avrdudeExecutable;
+            } else {
+                return;
+            }
+        }
+
+        const args = [
+            '-c', programmer,
+            '-p', mcu,
+            '-P', port,
+            '-U', `flash:w:${hexFilePath}:i`
+        ];
+        console.log(`Executing: ${avrdudePath} ${args.join(' ')}`);
 
         await vscode.window.withProgress({
             location: vscode.ProgressLocation.Notification,
@@ -50,10 +103,7 @@ async function uploadToMicrocontroller() {
             cancellable: false
         }, async () => {
             try {
-                const { stdout, stderr } = await execPromise(avrdudeCommand);
-                if (stderr && !stderr.includes('avrdude done.  Thank you.')) {
-                    throw new Error(stderr);
-                }
+                await runAvrdude(avrdudePath, args, useSystemAvrdude);
                 vscode.window.showInformationMessage('Upload successful!');
             } catch (error) {
                 vscode.window.showErrorMessage(`Upload failed: ${error.message}`);
@@ -65,10 +115,59 @@ async function uploadToMicrocontroller() {
     }
 }
 
-// Dropdown selector for programmer
-async function getProgrammer() {
+function loadProjectConfig(workspacePath) {
+    const configPath = path.join(workspacePath, '.vscode', 'avr_project.json');
+    try {
+        return fs.existsSync(configPath) ? JSON.parse(fs.readFileSync(configPath, 'utf8')) : {};
+    } catch {
+        return {};
+    }
+}
+
+function saveProjectConfig(workspacePath, updates) {
+    const configPath = path.join(workspacePath, '.vscode', 'avr_project.json');
+    const current = loadProjectConfig(workspacePath);
+    fs.writeFileSync(configPath, JSON.stringify({ ...current, ...updates }, null, 2), 'utf8');
+}
+
+function runAvrdude(avrdudePath, args, useSystemAvrdude) {
+    return new Promise((resolve, reject) => {
+        const process = spawn(avrdudePath, args, {
+            shell: useSystemAvrdude
+        });
+
+        let stdout = '';
+        let stderr = '';
+
+        process.stdout.on('data', (data) => {
+            stdout += data.toString();
+        });
+
+        process.stderr.on('data', (data) => {
+            stderr += data.toString();
+        });
+
+        process.on('close', (code) => {
+            if (code === 0 && stderr.includes('avrdude done.  Thank you.')) {
+                resolve({ stdout, stderr });
+            } else {
+                reject(new Error(stderr || `avrdude exited with code ${code}`));
+            }
+        });
+
+        process.on('error', (error) => {
+            if (useSystemAvrdude && error.code === 'ENOENT') {
+                reject(new Error('avrdude not found in system PATH. Please install avrdude or download the toolchain.'));
+            } else {
+                reject(error);
+            }
+        });
+    });
+}
+
+async function getProgrammer(savedProgrammer) {
     const config = vscode.workspace.getConfiguration('avr-utils');
-    const defaultProgrammer = config.get('programmer') || 'usbasp';
+    const defaultProgrammer = savedProgrammer || config.get('programmer') || 'usbasp';
     const programmers = [
         { label: 'usbasp', description: 'Common USB programmer' },
         { label: 'avrisp2', description: 'Atmel AVR ISP mkII' },
@@ -87,12 +186,10 @@ async function getProgrammer() {
         : selected ? selected.label : null;
 }
 
-// Dropdown selector for MCU
-async function getMcu() {
-    const currentDevice = selectedDevice(); // From init.js
-    const defaultMcu = currentDevice || vscode.workspace.getConfiguration('avr-utils').get('mcu') || 'atmega328p';
+async function getMcu(savedMcu) {
+    const currentDevice = selectedDevice();
+    const defaultMcu = savedMcu || currentDevice || vscode.workspace.getConfiguration('avr-utils').get('mcu') || 'atmega328p';
 
-    // Build searchable MCU list from devices
     const mcuItems = devices.map(device => {
         const isAssembly = device.endsWith('-asm');
         const baseName = isAssembly ? device.slice(0, -4) : device;
@@ -114,10 +211,9 @@ async function getMcu() {
     return selected ? selected.value : null;
 }
 
-// Dropdown selector for port
-async function getPort() {
+async function getPort(savedPort) {
     const config = vscode.workspace.getConfiguration('avr-utils');
-    const defaultPort = config.get('port') || (process.platform === 'win32' ? 'COM3' : '/dev/ttyUSB0');
+    const defaultPort = savedPort || config.get('port') || (process.platform === 'win32' ? 'COM3' : '/dev/ttyUSB0');
     const ports = [
         { label: 'COM3', description: 'Common Windows port' },
         { label: 'COM4', description: 'Common Windows port' },
