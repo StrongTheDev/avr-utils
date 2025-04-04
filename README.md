@@ -1,6 +1,6 @@
 # avr-utils README
 
-Welcome to **avr-utils**.
+Welcome to **`avr-utils`**.
 
 This extension helps users to write and compile code for their AVR microcontrollers straight from the comfort of their favorite code editor, **VSCode**.
 
@@ -9,7 +9,7 @@ New Features:
 - Progress bar when downloading toolchain.
 - Better error message diagnostics (Big Improvement!)
 - Simplified Commenting of code.
-- Enhanced upload functionality with saved programmer settings and dropdowns.
+- Added Upload functionality. You can now upload the built hex or elf files straight to your microcontroller unit.
 ```
 
 ## Features
@@ -44,13 +44,14 @@ New Features:
     ![IMAGE](assets/readme/1d-select-first-prompt.mp4.gif)
 
     Before running a successful build in **C**, you need to select a microcontroller so that **avr-gcc** does not give build errors.
-
-    <hr> ![IMAGE](assets/readme/1e-select-and-build.mp4.gif)
-
-
+    
+    ![IMAGE](assets/readme/1e-select-and-build.mp4.gif)
+    
     Once you build the project successfully, you will get a .elf file, a .hex file, and an .o file created for you within the Debug folder in your project.
 
     ![IMAGE](assets/readme/1f-build-outputs.mp4.gif)
+
+    ---
 
 - ### Code Completions
 
