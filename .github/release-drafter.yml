@@ -1,7 +1,19 @@
 # The Configuration
 
-name-template: 'v$RESOLVED_VERSION 🌈'
-tag-template: 'v$RESOLVED_VERSION'
+# Set the default version number
+version-template: '0.0.1'
+
+# Update the version number in the project configuration file
+version-files:
+  - file: package.json
+    version-template: '$MAJOR.$MINOR.$PATCH'
+
+artifacts:
+  - name: latest-build
+    files: extension-latest.zip
+
+name-template: 'v$NEXT_PATCH_VERSION 🎉'
+tag-template: 'v$NEXT_PATCH_VERSION'
 categories:
   - title: '🚀 Features'
     labels:
