@@ -2,9 +2,9 @@ const vscode = require('vscode');
 const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
-const compileProject = require('./commands/compileProject.js');
-const { selectedDevice } = require('./init');
-const { devices, toolchainDir } = require('./utils');
+const compileProject = require('./compileProject.js');
+const { selectedDevice } = require('../init');
+const { devices, toolchainDir } = require('../utils');
 
 async function uploadToMicrocontroller() {
     try {
