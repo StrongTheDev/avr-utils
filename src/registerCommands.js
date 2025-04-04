@@ -3,7 +3,7 @@ const compileProject = require('./commands/compileProject');
 const getToolchain = require('./commands/getToolchain');
 const makeProject = require('./commands/makeProject');
 const openMicrochipStudioProject = require('./commands/openMicrochipStudioProject');
-const { uploadToMicrocontroller } = require('./uploadToMicrocontroller');
+const { uploadToMicrocontroller } = require('./commands/uploadToMicrocontroller');
 
 module.exports = function () {
     vscode.commands.registerCommand('avr-utils.compileProject', compileProject);
