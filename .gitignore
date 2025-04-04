@@ -5,6 +5,7 @@
 /test
 /vsc-extension-quickstart.md
 /src/storage/data.json
-/out/storage/data.json
-/out/main.js
+/out/**/*
+!/out/storage/device_and_file.json
+!/out/storage/.file
 .vscode/settings.json
