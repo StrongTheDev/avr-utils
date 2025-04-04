@@ -2,7 +2,7 @@
     "name": "avr-utils",
     "displayName": "AVR Utils",
     "description": "This extension will help you to compile code for avr based microcontrollers straight from the comfort of your favourite code editor!",
-    "version": "0.1.6",
+    "version": "0.1.7",
     "repository": {
         "url": "https://github.com/DanielHuey/avr-utils.git",
         "type": "git"
@@ -19,7 +19,8 @@
         "onLanguage:avr-c",
         "onLanguage:asm",
         "onCommand:avr-utils.makeProject",
-        "onCommand:avr-utils.openMicrochipStudioProject"
+        "onCommand:avr-utils.openMicrochipStudioProject",
+        "onCommand:avr-utils.uploadToMicrocontroller"
     ],
     "main": "./extension.js",
     "contributes": {
@@ -37,12 +38,23 @@
                 "title": "AVR Utils: Build/Compile",
                 "icon": "$(debug-start)",
                 "enablement": "resourceLangId =~ /^(avr-c|asm)$/"
+            },
+            {
+                "command": "avr-utils.uploadToMicrocontroller",
+                "title": "AVR Utils: Upload to Microcontroller",
+                "icon": "$(cloud-upload)",
+                "enablement": "resourceLangId =~ /^(avr-c|asm)$/"
             }
         ],
         "menus": {
             "editor/title": [
                 {
                     "command": "avr-utils.compileProject",
+                    "group": "navigation",
+                    "when": "avr-utils.isAvrC"
+                },
+                {
+                    "command": "avr-utils.uploadToMicrocontroller",
                     "group": "navigation",
                     "when": "avr-utils.isAvrC"
                 }
@@ -52,6 +64,11 @@
             {
                 "command": "avr-utils.compileProject",
                 "key": "F4",
+                "when": "editorLangId =~ /^(avr-c|asm)$/"
+            },
+            {
+                "command": "avr-utils.uploadToMicrocontroller",
+                "key": "F5",
                 "when": "editorLangId =~ /^(avr-c|asm)$/"
             }
         ],
@@ -114,7 +131,7 @@
         "@types/vscode": "^1.60.0",
         "@vscode/test-electron": "^2.3.4",
         "@vscode/vsce": "^2.22.0",
-        "esbuild": "^0.19.10",
+        "esbuild": "^0.25.2",
         "eslint": "^8.50.0"
     },
     "dependencies": {

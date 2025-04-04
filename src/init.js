@@ -104,7 +104,7 @@ function showCompileButton() {
     compileButton.show();
 }
 
-function spinCompileButton(on=true) {
+function spinCompileButton(on = true) {
     if (on) {
         compileButton.text = "$(sync~spin) Building...";
     } else {
