@@ -22,7 +22,7 @@
         "onCommand:avr-utils.openMicrochipStudioProject",
         "onCommand:avr-utils.uploadToMicrocontroller"
     ],
-    "main": "./extension.js",
+    "main": "./out/main.js",
     "contributes": {
         "commands": [
             {

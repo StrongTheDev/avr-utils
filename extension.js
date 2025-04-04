@@ -14,17 +14,14 @@ const { dataObject } = require("./src/utils");
  * @param {vscode.ExtensionContext} context
  */
 function activate(context) {
-    console.log("Checking for data.json")
+    console.log("Checking for data.json");
     dataObject(); // To initialize the data.json file
-    console.log("Registering commands")
-    registerCommands();
-    // DO NOT MOVE THESE LINES ABOVE. THEY MUST COME FIRST
-    console.log("Initializing other dependencies")
+    console.log("Registering commands");
+    registerCommands(context); // Pass context here
+    console.log("Initializing other dependencies");
     init(context);
-
-    console.log("Registering providers")
+    console.log("Registering providers");
     registerProviders(context);
-
     console.log('"avr-utils" is now active!');
 }
 
