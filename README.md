@@ -97,7 +97,7 @@ New Features:
 
     To upload, press F5 or use the "Upload to Microcontroller" command from the command palette (Ctrl+Shift+P or Cmd+Shift+P, then type "AVR Utils: Upload to Microcontroller").
 
-    > **Note**: Ensure avrdude.exe exists in `AVR Utils\toolchain\bin` (e.g., `C:\Users\Youser-Name\Documents\AVR Utils\toolchain\bin\avrdude.exe` on Windows). If it’s missing, the extension will offer to download it automatically or use a system-installed avrdude.
+    > **Note**: Ensure avrdude.exe exists in `AVR Utils\toolchain\bin` (e.g., `C:\Users\user-Name\Documents\AVR Utils\toolchain\bin\avrdude.exe` on Windows). If it’s missing, the extension will offer to download it automatically or use a system-installed avrdude.
 
 <!-- ## Requirements If you have any requirements or dependencies, add a section describing those and how to install and configure them. -->
 
