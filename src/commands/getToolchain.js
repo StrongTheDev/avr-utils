@@ -34,7 +34,7 @@ async function getToolchain(platform, downloadsUrl, toolchainSources) {
     vscode.window.withProgress(
         { cancellable: true, location: vscode.ProgressLocation.Notification, title: `Downloading toolchain for ${platform}` },
         (progress) => {
-            return new Promise((resolvePromise,rejectPromise) => {
+            return new Promise((resolvePromise, rejectPromise) => {
                 get(newUrl, (response) => {
                     response.pipe(fs.createWriteStream(path.join(os.homedir(), "Documents", streamName)));
 
@@ -52,8 +52,8 @@ async function getToolchain(platform, downloadsUrl, toolchainSources) {
                     });
 
                     response.on("end", async () => {
-                        progress.report({message: "Toolchain downloaded"});
-            
+                        progress.report({ message: "Toolchain downloaded" });
+
                         let directory = null; // Will represent the directory that the user chooses to store the toolchain in
                         let chooseOwnDir = await vscode.window.showInformationMessage(
                             'Would you like to save the toolchain to the Documents folder?',
@@ -87,7 +87,7 @@ async function getToolchain(platform, downloadsUrl, toolchainSources) {
                                 await vscode.workspace.fs.createDirectory(pathUri);
                             }
                         }
-            
+
                         // Save the selected directory as the toolchain_directory so that users don't have to download the toolchain every time. 
                         fs.readFile(path.join(__dirname, "..", "storage", "data.json"), "utf8", (err, data) => {
                             if (err) throw err;
@@ -96,11 +96,11 @@ async function getToolchain(platform, downloadsUrl, toolchainSources) {
                             dataObject(extension_data);
                         });
 
-                        progress.report({message: "Extracting the Toolchain"});
+                        progress.report({ message: "Extracting the Toolchain" });
                         platform.toString() === "win32"
                             ? extractZip(`${path.join(os.homedir(), "Documents", streamName)}`, directory)
                             : extractTarball(`${path.join(os.homedir(), "Documents", streamName)}`, directory);
-                        progress.report({message: "Extraction complete! Happy coding!"});
+                        progress.report({ message: "Extraction complete! Happy coding!" });
 
                         setTimeout(() => resolvePromise(), 2250);
                     });

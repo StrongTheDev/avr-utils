@@ -2,9 +2,12 @@ const vscode = require('vscode');
 const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
+const decompress = require('decompress');
+const { get, request } = require('https');
 const compileProject = require('./compileProject.js');
 const { selectedDevice } = require('../init');
-const { devices, toolchainDir } = require('../utils');
+const { devices, toolchainDir, dataObject } = require('../utils');
 
 async function uploadToMicrocontroller() {
     try {
@@ -25,13 +28,11 @@ async function uploadToMicrocontroller() {
             return;
         }
 
-        // Load saved programmer settings
         const projectConfig = loadProjectConfig(workspacePath);
         const savedSettings = projectConfig.uploadSettings || {};
 
         let programmer, mcu, port;
 
-        // Check if there are saved settings and prompt user
         if (savedSettings.programmer && savedSettings.mcu && savedSettings.port) {
             const useSaved = await vscode.window.showQuickPick(
                 [
@@ -50,7 +51,6 @@ async function uploadToMicrocontroller() {
             }
         }
 
-        // If no saved settings or user wants to change them, prompt for new values
         if (!programmer || !mcu || !port) {
             programmer = await getProgrammer(savedSettings.programmer);
             if (!programmer) return;
@@ -61,7 +61,6 @@ async function uploadToMicrocontroller() {
             port = await getPort(savedSettings.port);
             if (!port) return;
 
-            // Save the new settings
             saveProjectConfig(workspacePath, { uploadSettings: { programmer, mcu, port } });
         }
 
@@ -71,17 +70,24 @@ async function uploadToMicrocontroller() {
 
         if (!fs.existsSync(avrdudePath)) {
             const action = await vscode.window.showWarningMessage(
-                `avrdude not found at ${avrdudePath}. Try using system-installed avrdude?`,
-                'Yes',
-                'Download Toolchain',
+                `avrdude not found at ${avrdudePath}.`,
+                'Download avrdude',
+                'Try System avrdude',
                 'Cancel'
             );
-            if (action === 'Download Toolchain') {
-                await vscode.commands.executeCommand('avr-utils.getToolchain');
-                if (!fs.existsSync(avrdudePath)) {
-                    throw new Error('Toolchain download failed or avrdude is still missing.');
+
+            if (action === 'Download avrdude') {
+                try {
+                    await downloadAvrdude();
+                    if (!fs.existsSync(avrdudePath)) {
+                        const binDir = path.join(toolchainDir(), 'bin');
+                        const dirContents = fs.existsSync(binDir) ? fs.readdirSync(binDir) : [];
+                        throw new Error(`avrdude installation failed. Expected path: ${avrdudePath}. Bin directory contents: ${dirContents.join(', ')}`);
+                    }
+                } catch (error) {
+                    throw new Error(`Failed to download and install avrdude: ${error.message}`);
                 }
-            } else if (action === 'Yes') {
+            } else if (action === 'Try System avrdude') {
                 useSystemAvrdude = true;
                 avrdudePath = avrdudeExecutable;
             } else {
@@ -115,6 +121,127 @@ async function uploadToMicrocontroller() {
     }
 }
 
+async function downloadAvrdude() {
+    const avrdudeUrl = 'https://github.com/avrdudes/avrdude/releases/download/v8.0/avrdude-v8.0-windows-x64.zip';
+    const tempPath = path.join(os.homedir(), 'Documents', 'avrdude-v8.0-windows-x64.zip');
+    const targetDir = path.join(toolchainDir(), 'bin');
+
+    console.log(`Starting download from: ${avrdudeUrl}`);
+    console.log(`Temporary file path: ${tempPath}`);
+    console.log(`Target directory: ${targetDir}`);
+
+    const finalUrl = await followRedirects(avrdudeUrl);
+    console.log(`Final download URL after redirects: ${finalUrl}`);
+
+    await vscode.window.withProgress(
+        {
+            cancellable: true,
+            location: vscode.ProgressLocation.Notification,
+            title: 'Downloading avrdude v8.0'
+        },
+        async (progress) => {
+            return new Promise((resolvePromise, rejectPromise) => {
+                get(finalUrl, (response) => {
+                    if (response.statusCode !== 200) {
+                        rejectPromise(new Error(`Download failed with status code: ${response.statusCode}`));
+                        return;
+                    }
+
+                    const fileStream = fs.createWriteStream(tempPath);
+                    response.pipe(fileStream);
+
+                    const totalBytes = parseInt(response.headers['content-length'], 10);
+                    let downloadedBytes = 0;
+
+                    response.on('data', (chunk) => {
+                        const length = chunk.length;
+                        downloadedBytes += length;
+                        const percent = Math.round((downloadedBytes / totalBytes) * 100);
+                        progress.report({
+                            message: `${percent}%`,
+                            increment: (length / totalBytes) * 100
+                        });
+                    });
+
+                    fileStream.on('finish', async () => {
+                        progress.report({ message: 'Download complete, extracting...' });
+                        console.log('Download completed successfully');
+
+                        try {
+                            await vscode.workspace.fs.stat(vscode.Uri.file(targetDir));
+                        } catch (_) {
+                            console.log(`Creating directory: ${targetDir}`);
+                            await vscode.workspace.fs.createDirectory(vscode.Uri.file(targetDir));
+                        }
+
+                        try {
+                            console.log(`Extracting ${tempPath} to ${targetDir}`);
+                            const files = await decompress(tempPath, targetDir, { strip: 1 });
+                            console.log(`Extracted files: ${files.map(f => f.path).join(', ')}`);
+                        } catch (extractError) {
+                            rejectPromise(new Error(`Extraction failed: ${extractError.message}`));
+                            return;
+                        }
+
+                        try {
+                            fs.unlinkSync(tempPath);
+                            console.log(`Cleaned up temporary file: ${tempPath}`);
+                        } catch (cleanupError) {
+                            console.warn(`Failed to delete temp file: ${cleanupError.message}`);
+                        }
+
+                        const extension_data = dataObject();
+                        if (!extension_data.toolchain_directory) {
+                            extension_data.toolchain_directory = toolchainDir();
+                            dataObject(extension_data);
+                            console.log(`Set toolchain directory to: ${toolchainDir()}`);
+                        }
+
+                        progress.report({ message: 'avrdude installed successfully!' });
+                        setTimeout(() => resolvePromise(), 1000);
+                    });
+
+                    response.on('error', (err) => {
+                        vscode.window.showErrorMessage(`Error downloading avrdude: ${err.message}`);
+                        rejectPromise(err);
+                    });
+
+                    fileStream.on('error', (err) => {
+                        vscode.window.showErrorMessage(`Error writing avrdude file: ${err.message}`);
+                        rejectPromise(err);
+                    });
+                }).on('error', (err) => {
+                    vscode.window.showErrorMessage(`Error initiating download: ${err.message}`);
+                    rejectPromise(err);
+                });
+            });
+        }
+    );
+}
+
+function followRedirects(url, redirectCount = 0) {
+    const maxRedirects = 5;
+    return new Promise((resolve, reject) => {
+        request(url, { method: 'HEAD' }, (response) => {
+            if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
+                if (redirectCount >= maxRedirects) {
+                    reject(new Error(`Too many redirects (max ${maxRedirects})`));
+                    return;
+                }
+                console.log(`Redirecting from ${url} to ${response.headers.location}`);
+                resolve(followRedirects(response.headers.location, redirectCount + 1));
+            } else if (response.statusCode === 200) {
+                resolve(url);
+            } else {
+                reject(new Error(`Unexpected status code: ${response.statusCode}`));
+            }
+        }).on('error', (err) => {
+            reject(new Error(`Redirect check failed: ${err.message}`));
+        }).end();
+    });
+}
+
+// Rest of the original functions remain unchanged
 function loadProjectConfig(workspacePath) {
     const configPath = path.join(workspacePath, '.vscode', 'avr_project.json');
     try {
@@ -157,7 +284,7 @@ function runAvrdude(avrdudePath, args, useSystemAvrdude) {
 
         process.on('error', (error) => {
             if (useSystemAvrdude && error.code === 'ENOENT') {
-                reject(new Error('avrdude not found in system PATH. Please install avrdude or download the toolchain.'));
+                reject(new Error('avrdude not found in system PATH. Please install avrdude or download it.'));
             } else {
                 reject(error);
             }
