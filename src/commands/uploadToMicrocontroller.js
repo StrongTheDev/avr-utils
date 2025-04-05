@@ -122,9 +122,27 @@ async function uploadToMicrocontroller() {
 }
 
 async function downloadAvrdude() {
-    const avrdudeUrl = 'https://github.com/avrdudes/avrdude/releases/download/v8.0/avrdude-v8.0-windows-x64.zip';
-    const tempPath = path.join(os.homedir(), 'Documents', 'avrdude-v8.0-windows-x64.zip');
+    const platform = process.platform;
+    let avrdudeUrl, archiveType;
+
+    if (platform === 'win32') {
+        avrdudeUrl = 'https://github.com/avrdudes/avrdude/releases/download/v8.0/avrdude-v8.0-windows-x64.zip';
+        archiveType = 'zip';
+    } else if (platform === 'linux') {
+        avrdudeUrl = 'https://github.com/avrdudes/avrdude/releases/download/v8.0/avrdude_v8.0_Linux_64bit.tar.gz';
+        archiveType = 'tar';
+    } else if (platform === 'darwin') {
+        avrdudeUrl = 'https://github.com/avrdudes/avrdude/releases/download/v8.0/avrdude_v8.0_macOS_64bit.tar.gz';
+        archiveType = 'tar';
+    } else {
+        throw new Error(`Unsupported platform: ${platform}`);
+    }
+
+    const fileName = path.basename(avrdudeUrl);
+    const tempPath = path.join(os.homedir(), 'Documents', fileName);
+
     const targetDir = path.join(toolchainDir(), 'bin');
+    const tar = require('tar'); // you already have it in other versions
 
     console.log(`Starting download from: ${avrdudeUrl}`);
     console.log(`Temporary file path: ${tempPath}`);
@@ -176,8 +194,27 @@ async function downloadAvrdude() {
 
                         try {
                             console.log(`Extracting ${tempPath} to ${targetDir}`);
-                            const files = await decompress(tempPath, targetDir, { strip: 1 });
+                            if (archiveType === 'zip') {
+                                const files = await decompress(tempPath, targetDir, { strip: 1 });
+                                console.log(`Extracted files: ${files.map(f => f.path).join(', ')}`);
+                            } else if (archiveType === 'tar') {
+                                await tar.x({ file: tempPath, C: targetDir, strip: 1 });
+                                console.log(`Extracted tar archive to ${targetDir}`);
+                            }
                             console.log(`Extracted files: ${files.map(f => f.path).join(', ')}`);
+
+
+
+                            if (process.platform !== 'win32') {
+                                const avrdudeBinPath = path.join(targetDir, 'avrdude');
+                                try {
+                                    fs.chmodSync(avrdudeBinPath, 0o755);
+                                    console.log('Set executable permissions for avrdude');
+                                } catch (e) {
+                                    console.warn('chmod failed:', e.message);
+                                }
+                            }
+
                         } catch (extractError) {
                             rejectPromise(new Error(`Extraction failed: ${extractError.message}`));
                             return;
@@ -296,9 +333,20 @@ async function getProgrammer(savedProgrammer) {
     const config = vscode.workspace.getConfiguration('avr-utils');
     const defaultProgrammer = savedProgrammer || config.get('programmer') || 'usbasp';
     const programmers = [
-        { label: 'usbasp', description: 'Common USB programmer' },
-        { label: 'avrisp2', description: 'Atmel AVR ISP mkII' },
+        { label: 'usbasp', description: 'USBasp - Common USB programmer' },
+        { label: 'avrisp2', description: 'AVR ISP mkII - Official Atmel programmer' },
         { label: 'stk500v1', description: 'STK500 v1 protocol' },
+        { label: 'stk500v2', description: 'STK500 v2 protocol' },
+        { label: 'arduino', description: 'Arduino as ISP' },
+        { label: 'wiring', description: 'Wiring-based programmers' },
+        { label: 'avrisp', description: 'AVR ISP (original)' },
+        { label: 'usbtiny', description: 'USBtiny simple USB programmer' },
+        { label: 'dragon_isp', description: 'AVR Dragon in ISP mode' },
+        { label: 'dragon_dw', description: 'AVR Dragon in debugWire mode' },
+        { label: 'jtag1', description: 'JTAG ICE mkI' },
+        { label: 'jtag2', description: 'JTAG ICE mkII' },
+        { label: 'pickit2', description: 'Microchip PICkit2 in AVR mode' },
+        { label: 'ponyser', description: 'PonyProg serial programmer' },
         { label: 'Custom...', description: 'Enter a custom programmer type' }
     ];
 
