@@ -10,6 +10,7 @@ New Features:
 - Better error message diagnostics (Big Improvement!)
 - Simplified Commenting of code.
 - Added Upload functionality. You can now upload the built hex or elf files straight to your microcontroller unit.
+- Automatic avrdude download when missing, with redirect handling for reliable installation.
 ```
 
 ## Features
@@ -85,17 +86,18 @@ New Features:
 
 - ### Uploading to Microcontroller
 
-  - #### >> Upload with Saved Programmer Settings
+  - #### >> Upload with Saved Programmer Settings and Auto-Download
 
-    The extension now supports uploading your compiled .hex file to an AVR microcontroller with enhanced usability features.
+    The extension now supports uploading your compiled .hex file to an AVR microcontroller with enhanced usability features and automatic avrdude installation.
 
     - **Saved Settings**: After your first upload, the programmer type (e.g., usbasp), MCU (e.g., atmega16), and port (e.g., COM3) are saved in avr_project.json. On subsequent uploads, you’ll be prompted to either use the saved settings or change them, making repeated uploads faster.
     - **Dropdown Selections**: Instead of manually typing the programmer, MCU, and port, you can now select them from dropdown menus with common options and a "Custom..." fallback for flexibility. Each option includes a description (e.g., "Common USB programmer" for usbasp) to help you choose the right settings.
-    - **Improved Reliability**: The upload process has been made more reliable, especially on Windows, by fixing path issues with avrdude. The extension now uses the correct path for avrdude (e.g., AVR Utils\toolchain\bin\avrdude.exe), adds .exe for Windows, and provides a fallback to a system-installed avrdude if the toolchain version is missing.
+    - **Automatic avrdude Download**: If avrdude is not found in the toolchain's bin directory (e.g., `AVR Utils\toolchain\bin\avrdude.exe`), the extension will prompt you to download avrdude👍 v8.0 for Windows x64 automatically from GitHub. It handles redirects, shows a progress bar, and extracts it to the correct location.
+    - **Improved Reliability**: The upload process has been made more reliable, especially on Windows, by fixing path issues with avrdude. The extension now uses the correct path for avrdude, adds .exe for Windows, and provides fallbacks to either download avrdude or use a system-installed version if needed.
 
     To upload, press F5 or use the "Upload to Microcontroller" command from the command palette (Ctrl+Shift+P or Cmd+Shift+P, then type "AVR Utils: Upload to Microcontroller").
 
-    > **Note**: Ensure avrdude.exe exists in AVR Utils\toolchain\bin (e.g., C:\Users\hp\Documents\AVR Utils\toolchain\bin\avrdude.exe on Windows). If it’s missing, the extension will prompt you to download the toolchain or use a system-installed avrdude.
+    > **Note**: Ensure avrdude.exe exists in `AVR Utils\toolchain\bin` (e.g., `C:\Users\Youser-Name\Documents\AVR Utils\toolchain\bin\avrdude.exe` on Windows). If it’s missing, the extension will offer to download it automatically or use a system-installed avrdude.
 
 <!-- ## Requirements If you have any requirements or dependencies, add a section describing those and how to install and configure them. -->
 
@@ -123,7 +125,14 @@ If you have the extension ms-vscode.cpptools installed, it will cause red squigg
 ## Release Notes
 
 Release notes section.
+### 0.1.8 (Pending)
 
+- Added automatic avrdude download feature:
+  - Downloads avrdude v8.0 for Windows x64 from GitHub when missing
+  - Handles HTTP redirects for reliable downloads
+  - Shows progress bar during download and extraction
+  - Extracts to toolchain bin directory with improved error handling
+  
 ### 0.1.7
 
 - Added programmer part with saved settings for uploading: programmer type, MCU, and port are saved in avr_project.json after each upload, with a prompt to reuse or change them.
