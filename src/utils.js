@@ -66,11 +66,23 @@ function dataObject(saveObject = null) {
     try {
         return JSON.parse(fs.readFileSync(pathToDataFile, "utf8"));
     } catch {
-        let temp = {toolchain_directory: `${path.join(homedir(), "Documents")}`};
+        let temp = {toolchain_directory: `${findToolchainDirectory()}`};
         dataObject(temp);
         return temp;
     }
 }
+
+function findToolchainDirectory() {
+    let documentsDirectory = path.join(homedir(), "Documents");
+    if (fs.existsSync(path.join(documentsDirectory, "AVR Utils"))) {
+        documentsDirectory = path.join(documentsDirectory, "AVR Utils");
+    }
+    if (fs.existsSync(path.join(documentsDirectory, "toolchain"))) {
+        documentsDirectory = path.join(documentsDirectory, "toolchain");
+    } 
+    return documentsDirectory;
+}
+
 /** Toolchain Directory */
 function toolchainDir() {
     return dataObject().toolchain_directory;
