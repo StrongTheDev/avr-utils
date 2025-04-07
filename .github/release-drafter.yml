@@ -1,7 +1,7 @@
 # The Configuration
 
 # Set the default version number
-version-template: '0.0.1'
+version-template: '$NEXT_PATCH_VERSION'
 
 # Update the version number in the project configuration file
 version-files:
@@ -43,3 +43,5 @@ template: |
   ## Changes
 
   $CHANGES
+
+  **Full Changelog**: [Here](https://github.com/StrongTheDev/avr-utils/compare/v$PREVIOUS_TAG...v$RESOLVED_VERSION)
