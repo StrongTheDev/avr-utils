@@ -139,7 +139,18 @@
         "decompress": "^4.2.1",
         "tar": "^6.2.0"
     },
-    "author": "Daniel Strong Agani <aganidanielstrong@gmail.com> (https://github.com/StrongTheDev)",
+    "authors": [
+        {
+            "name": "Daniel Strong Agani",
+            "email": "aganidanielstrong@gmail.com",
+            "url": "https://github.com/StrongTheDev"
+        },
+        {
+            "name": "Alireza Jahanbakhshi",
+            "email": "alireza.jahanbakhshi@yahoo.com",
+            "url": "https://github.com/Alireza-Jahanbakhshi"
+        }
+    ],
     "license": "MIT",
     "directories": {
         "test": "test"
