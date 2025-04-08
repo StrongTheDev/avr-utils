@@ -12,6 +12,7 @@ New Features:
 - Added Upload functionality: Upload .hex or .elf files directly to your AVR microcontroller.
 - Automatic avrdude download for Windows, Linux, and macOS — with redirect handling and platform-specific archive support.
 - Programmer type dropdown expanded: supports 13+ common avrdude programmer options.
+- Improved upload success detection and error handling
 ```
 
 ---
@@ -72,7 +73,14 @@ The extension supports uploading your compiled `.hex` file to an AVR microcontro
   - Extracts to toolchain bin folder  
   - Grants executable permission on Unix systems automatically
 
+- ✅ **Improved Upload Handling**  
+  - Robust success detection using multiple indicators (exit code, completion message, verification status)  
+  - Detailed error reporting with full output  
+  - USBasp support without port requirement maintained  
+  - Configurable fuse settings with defaults for atmega16
+
 - ✅ **Fallbacks & Robustness**  
+  - Detailed console logging for upload results and errors
   - Will fallback to system-installed `avrdude` if download skipped  
   - Verifies `avrdude` exists post-install  
   - All errors are logged for transparency
@@ -132,6 +140,16 @@ Search for **AVR Utils** in VSCode settings:
 ---
 
 ## 📦 Release Notes
+### 0.2.0
+
+- ✅ Fixed false "Upload failed" errors by improving success detection:
+  - Checks exit code, "avrdude done" message, and "bytes of flash verified"
+  - Captures full output for better diagnostics
+- 📋 Enhanced error reporting with detailed messages
+- 🔧 Maintained USBasp no-port support and fuse configurability
+- 📜 Added detailed console logging for upload results
+- 📘 Updated README with new features and improvements
+
 
 ### 0.1.9
 
