@@ -13,6 +13,7 @@ New Features:
 - Automatic avrdude download for Windows, Linux, and macOS — with redirect handling and platform-specific archive support.
 - Programmer type dropdown expanded: supports 13+ common avrdude programmer options.
 - Improved upload success detection and error handling
+- Added Serial Monitor: Monitor and interact with your AVR microcontroller via a serial port directly in VSCode.
 ```
 
 ---
@@ -89,6 +90,54 @@ The extension supports uploading your compiled `.hex` file to an AVR microcontro
 
 > 💡 Make sure the compiled `.hex` exists inside your `Debug` folder.
 
+
+> 
+
+------
+
+### 📡 Serial Monitor
+
+#### >> Monitor and Interact with Your AVR Microcontroller
+
+The extension now includes a Serial Monitor to communicate with your AVR microcontroller via a serial port:
+
+- ✅ 
+
+  Interactive Serial Communication
+
+  - Open the Serial Monitor to view incoming data from your microcontroller and send messages back.
+  - Supports selecting a serial port and baud rate via quick pick.
+
+- ✅ 
+
+  Modern UI
+
+  - Features a toolbar with:
+    - Line ending selection (None, Newline, Carriage Return, Both NL & CR).
+    - Start/Stop button to toggle monitoring.
+    - Clear button to clear the output.
+    - Autoscroll toggle to control scrolling behavior.
+    - Data rate indicator (lines per second).
+  - Styled with a dark theme, hover effects, and tooltips for better usability.
+
+- ✅ 
+
+  Performance Optimization
+
+  - Throttles updates to the UI every 100ms to prevent freezing.
+  - Limits the output to 500 lines to maintain performance.
+
+- ✅ 
+
+  Error Handling
+
+  - Displays error messages for serial port operations (e.g., failed to open port, write errors).
+  - Automatically closes the Serial Monitor if the port is disconnected.
+
+🔁 Use "Open Serial Monitor" from the Command Palette to launch the Serial Monitor.
+
+> 💡 The Serial Monitor opens as a panel beside your active editor. Ensure your microcontroller is connected and sending data.
+
 ---
 
 ### ✨ Code Completions & Definitions
@@ -119,6 +168,7 @@ Press `Ctrl+Shift+P` or `Cmd+Shift+P` → Type **AVR Utils** to access:
 - **Open Microchip Project**
 - **Build/Compile** (also `F4`)
 - **Upload to Microcontroller** (`F5`)
+- **Open Serial Monitor** 
 
 ---
 
@@ -140,6 +190,16 @@ Search for **AVR Utils** in VSCode settings:
 ---
 
 ## 📦 Release Notes
+
+### 0.3.0
+
+- ✅ Added Serial Monitor feature:
+  - Displays as a Webview panel beside the active editor.
+  - Supports serial port selection and baud rate configuration.
+  - Includes a modern UI with line ending selection, start/stop monitoring, clear output, autoscroll, and data rate indicator.
+  - Throttles updates (100ms) and limits output (500 lines) for performance.
+  - Handles errors for serial port operations with user-friendly messages.
+  
 ### 0.2.0
 
 - ✅ Fixed false "Upload failed" errors by improving success detection:
