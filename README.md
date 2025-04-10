@@ -18,7 +18,7 @@ New Features:
 
 ---
 
-> Special thanks to: [@Alireza-Jahanbakhshi](https://github.com/Alireza-Jahanbakhshi) for the addition of uploading functionality to this extension.
+> Authors: [@Alireza-Jahanbakhshi](https://github.com/Alireza-Jahanbakhshi), [@StrongTheDev](https://github.com/StrongTheDev)
 
 ## Features
 
