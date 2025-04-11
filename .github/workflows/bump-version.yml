@@ -64,4 +64,4 @@ jobs:
     - name: Create pull request
       run: gh pr create -B main -H bump-to-${{ env.new_version }} --title 'Merge bump-to-${{ env.new_version }} into main' --body 'Created by Github action'
       env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
