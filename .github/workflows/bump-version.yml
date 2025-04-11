@@ -69,5 +69,6 @@ jobs:
         title: "Bump version to ${{ env.new_version }}"
         body: "This PR bumps the version to ${{ env.new_version }}"
         base: main
+        delete-branch: true
         labels: |
           chore
