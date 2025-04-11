@@ -68,7 +68,6 @@ jobs:
         commit-message: "Bump version to ${{ env.new_version }}"
         title: "Bump version to ${{ env.new_version }}"
         body: "This PR bumps the version to ${{ env.new_version }}"
-        branch: bump-to-${{ env.new_version }}
         base: main
         labels: |
           chore
