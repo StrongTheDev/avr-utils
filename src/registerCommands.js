@@ -4,6 +4,7 @@ const getToolchain = require('./commands/getToolchain');
 const makeProject = require('./commands/makeProject');
 const openMicrochipStudioProject = require('./commands/openMicrochipStudioProject');
 const { uploadToMicrocontroller } = require('./commands/uploadToMicrocontroller');
+const { openSerialMonitor } = require('./commands/openSerialMonitor');
 
 module.exports = function () {
     vscode.commands.registerCommand('avr-utils.compileProject', compileProject);
@@ -11,4 +12,5 @@ module.exports = function () {
     vscode.commands.registerCommand('avr-utils.makeProject', makeProject);
     vscode.commands.registerCommand('avr-utils.openMicrochipStudioProject', openMicrochipStudioProject);
     vscode.commands.registerCommand('avr-utils.uploadToMicrocontroller', uploadToMicrocontroller);
+    vscode.commands.registerCommand('avr-utils.openSerialMonitor', openSerialMonitor);
 }
