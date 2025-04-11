@@ -2,7 +2,7 @@
     "name": "avr-utils",
     "displayName": "AVR Utils",
     "description": "This extension will help you to compile code for avr based microcontrollers straight from the comfort of your favourite code editor!",
-    "version": "0.1.9",
+    "version": "0.2.0",
     "repository": {
         "url": "https://github.com/StrongTheDev/avr-utils.git",
         "type": "git"
@@ -49,7 +49,7 @@
                 "command": "avr-utils.openSerialMonitor",
                 "title": "AVR Utils: Open Serial Monitor",
                 "icon": "$(terminal)"
-              }
+            }
         ],
         "menus": {
             "editor/title": [
