@@ -58,7 +58,7 @@ jobs:
       run: |
         git add package.json package-lock.json
         git commit -m "Bump version to ${{ env.new_version }}"
-        git push origin HEAD:bump-to-${{ env.new_version }}
+        git push origin HEAD:refs/heads/bump-to-${{ env.new_version }}
 
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v7
