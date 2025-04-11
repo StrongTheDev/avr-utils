@@ -1,12 +1,5 @@
 # The Configuration
-
-# Set the default version number
-version-template: '$NEXT_PATCH_VERSION'
-
-# Update the version number in the project configuration file
-version-files:
-  - file: package.json
-    version-template: '$MAJOR.$MINOR.$PATCH'
+name: Release Drafter
 
 artifacts:
   - name: latest-build
