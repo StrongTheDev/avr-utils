@@ -56,9 +56,10 @@ jobs:
 
     - name: Push changes
       run: |
+        git checkout -b bump-to-${{ env.new_version }}
         git add package.json package-lock.json
         git commit -m "Bump version to ${{ env.new_version }}"
-        git push origin HEAD:refs/heads/bump-to-${{ env.new_version }}
+        git push origin bump-to-${{ env.new_version }}
 
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v7
@@ -68,6 +69,6 @@ jobs:
         title: "Bump version to ${{ env.new_version }}"
         body: "This PR bumps the version to ${{ env.new_version }}"
         branch: bump-to-${{ env.new_version }}
-        base: main  # Change this to your default branch if it's not 'main'
+        base: main
         labels: |
           chore
