@@ -37,6 +37,11 @@ jobs:
 
     - name: Install dependencies
       run: npm install
+      
+    - name: Configure Git Credentials for github-actions[bot]
+      run: |
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
     - name: Bump version and pack
       run: node_modules/@vscode/vsce/vsce pack ${{ github.event.inputs.version_type }}
@@ -47,8 +52,6 @@ jobs:
 
     - name: Push changes
       run: |
-        git config --global user.name 'github-actions[bot]'
-        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
         git add package.json package-lock.json
         git commit -m "Bump version to ${{ env.new_version }}"
         git push origin HEAD:bump-to-${{ env.new_version }}
