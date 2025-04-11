@@ -44,7 +44,12 @@
                 "title": "AVR Utils: Upload to Microcontroller",
                 "icon": "$(cloud-upload)",
                 "enablement": "resourceLangId =~ /^(avr-c|asm)$/"
-            }
+            },
+            {
+                "command": "avr-utils.openSerialMonitor",
+                "title": "AVR Utils: Open Serial Monitor",
+                "icon": "$(terminal)"
+              }
         ],
         "menus": {
             "editor/title": [
@@ -137,6 +142,7 @@
     "dependencies": {
         "adm-zip": "^0.5.16",
         "decompress": "^4.2.1",
+        "serialport": "^13.0.0",
         "tar": "^6.2.0"
     },
     "authors": [
