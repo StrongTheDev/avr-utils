@@ -1,6 +1,7 @@
 const fs = require("fs");
-const tar = require("tar");
 const decompress = require("decompress");
+const decompressTargz = require("decompress-targz");
+const decompressUnzip = require("decompress-unzip");
 const vscode = require("vscode");
 
 /**
@@ -53,9 +54,9 @@ function extractTarball(descriptor) {
  * @param {string} [descriptor.decompressSuccessMessage="Extraction Complete!"]
  * @param {decompress.DecompressOptions} [descriptor.decompressOptions={ strip: 1 }]
  */
-function extractZip(descriptor) {
+function extractArchive(descriptor) {
   decompress(descriptor.filePath, descriptor.directory, {
-    ...{ strip: 1 },
+    ...{ strip: 1, plugins: [decompressUnzip(), decompressTargz()] },
     ...descriptor.decompressOptions,
   }).then(async () => {
     let result = await vscode.window.showInformationMessage(
@@ -76,6 +77,5 @@ function extractZip(descriptor) {
 }
 
 module.exports = {
-  extractTarball,
-  extractZip,
+  extractArchive,
 };

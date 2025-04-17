@@ -167,7 +167,8 @@
         "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
         "test-compile": "tsc -p ./",
         "avr-utils": "npm run esbuild-base",
-        "tsc": "npx tsc"
+        "tsc": "npx tsc",
+        "pack": "npm run avr-utils && vsce pack"
     },
     "devDependencies": {
         "@types/decompress": "^4.2.7",
@@ -182,8 +183,9 @@
     "dependencies": {
         "adm-zip": "^0.5.16",
         "decompress": "^4.2.1",
-        "serialport": "^13.0.0",
-        "tar": "^6.2.0"
+        "decompress-targz": "^4.1.1",
+        "decompress-unzip": "^4.0.1",
+        "serialport": "^13.0.0"
     },
     "authors": [
         {

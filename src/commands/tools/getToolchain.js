@@ -3,7 +3,7 @@ const os = require("os");
 const fs = require("fs");
 const path = require("path");
 const { get } = require("https");
-const { extractTarball, extractZip } = require("../../util/decompression");
+const { extractArchive } = require("../../util/decompression");
 const { DownloadSource } = require("../../util/download");
 const { setSetting, Setting } = require("../../services/storageService");
 // const { extensionDataStorageObject } = require("../../util/fileSystem");
@@ -85,9 +85,7 @@ async function getToolchain() {
                             filePath,
                             directory,
                         };
-                        toolchainSource.getFileType() === "zip"
-                            ? extractZip(extractOptions)
-                            : extractTarball(extractOptions);
+                        extractArchive(extractOptions);
 
                         // Save the selected directory as the toolchain_directory so that users don't have to download the toolchain every time. 
                         setSetting(Setting.TOOLCHAIN_DIRECTORY, directory, true);

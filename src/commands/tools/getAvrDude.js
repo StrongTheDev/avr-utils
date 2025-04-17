@@ -5,7 +5,7 @@ const fs = require("fs");
 const os = require("os");
 const { getToolchainDirectory } = require("../../util/toolchain");
 const { get } = require("https");
-const { extractZip, extractTarball } = require("../../util/decompression");
+const { extractArchive } = require("../../util/decompression");
 
 const avrDudeSource = new DownloadSource(
   "https://github.com/avrdudes/avrdude/releases/download/v8.0/"
@@ -58,10 +58,8 @@ async function getAvrdude() {
 
       if (!fs.existsSync(targetDir))
         fs.mkdirSync(targetDir, { recursive: true });
-      if (avrDudeSource.getFileType() === "zip") {
-        extractZip({ filePath: tempPath, directory: targetDir });
-      } else {
-        extractTarball({ filePath: tempPath, directory: targetDir });
+      extractArchive({ filePath: tempPath, directory: targetDir });
+      if (avrDudeSource.getFileType() === "tar") {
         fs.chmodSync(path.join(targetDir, 'avrdude'), 0o755); // Make the avrdude binary executable
       }
     }
