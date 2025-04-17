@@ -1,8 +1,8 @@
-const fs = require('fs');
-const path = require('path');
-const { events, ExtensionEvents } = require('./events');
-const { getWorkspaceFolderPath } = require('../core/workspaceManager');
-const { getSetting } = require('../services/storageService');
+const fs = require("fs");
+const path = require("path");
+const { events, ExtensionEvents } = require("./events");
+const { getWorkspaceFolderPath } = require("../core/workspaceManager");
+const { getSetting } = require("../services/storageService");
 
 /**
  * @param {Object} objectToSave - The JSON object to save or update.
@@ -43,39 +43,48 @@ export class ProjectSettings {
   serialSettings?: {
     port?: string;
     baudrate?: string;
-  }
+  };
 }
 
-events.on(ExtensionEvents.DEVICE_SELECTED, (mcu: string, isAssembly: boolean) => {
-  // ".vscode" path
-  saveOrUpdateProjectConfig({mcu, isAssembly});
-});
+events.on(
+  ExtensionEvents.DEVICE_SELECTED,
+  (mcu: string, isAssembly: boolean) => {
+    saveOrUpdateProjectConfig({ mcu, isAssembly });
+  }
+);
 
-
-export function saveOrUpdateProjectConfig(config: ProjectSettings) {
+export function saveOrUpdateProjectConfig(
+  config: ProjectSettings
+): ProjectSettings {
   const pathToAvrUtilsFile = path.join(
     getWorkspaceFolderPath(),
     ".vscode",
     "avr_project.json"
   );
-  saveOrUpdateJSONObject(config, pathToAvrUtilsFile);
+  let projectConfig = fs.existsSync(pathToAvrUtilsFile)
+    ? JSON.parse(fs.readFileSync(pathToAvrUtilsFile, "utf8"))
+    : {};
+  config = { ...projectConfig, ...config };
+  return saveOrUpdateJSONObject(config, pathToAvrUtilsFile);
 }
 
 export function loadProjectConfig(): ProjectSettings {
-    const pathToAvrUtilsFile = path.join(
-      getWorkspaceFolderPath(),
-      ".vscode",
-      "avr_project.json"
-    );
-    let projectConfig = fs.existsSync(pathToAvrUtilsFile) ? JSON.parse(fs.readFileSync(pathToAvrUtilsFile, 'utf8')) : {};
-    // handle the older api
-    if (projectConfig.avrDevice) {
-      projectConfig.mcu = projectConfig.avrDevice;
-    }
-    if (!projectConfig.isAssembly) {
-      projectConfig.isAssembly = false;
-    }
-    return projectConfig;
+  const pathToAvrUtilsFile = path.join(
+    getWorkspaceFolderPath(),
+    ".vscode",
+    "avr_project.json"
+  );
+  let projectConfig = fs.existsSync(pathToAvrUtilsFile)
+    ? JSON.parse(fs.readFileSync(pathToAvrUtilsFile, "utf8"))
+    : {};
+  // handle the older api
+  if (projectConfig.avrDevice) {
+    projectConfig.mcu = projectConfig.avrDevice;
+  }
+  if (!projectConfig.isAssembly) {
+    projectConfig.isAssembly = false;
+  }
+  return projectConfig;
 }
 
-export const getExtensionRootPath = () => getSetting('extensionRootPath');
+export const getExtensionRootPath = () => getSetting("extensionRootPath");

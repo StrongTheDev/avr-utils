@@ -63,18 +63,18 @@
                 {
                     "command": "avr-utils.compileProject",
                     "group": "navigation",
-                    "when": "avr-utils.contextActive"
+                    "when": "editorLangId =~ /^(avr-c|asm)$/"
                 },
                 {
                     "command": "avr-utils.uploadToMicrocontroller",
                     "group": "navigation",
-                    "when": "avr-utils.contextActive",
+                    "when": "editorLangId =~ /^(avr-c|asm)$/",
                     "alt": "avr-utils.uploadToMicrocontroller.alt"
                 },
                 {
                     "command": "avr-utils.openSerialMonitor",
                     "group": "navigation",
-                    "when": "avr-utils.contextActive"
+                    "when": "editorLangId =~ /^(avr-c|asm)$/"
                 }
             ]
         },

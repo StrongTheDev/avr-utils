@@ -1,5 +1,5 @@
 // const vscode = require('vscode');
-const { EventEmitter } = require("events");
+const EventEmitter = /** @type {import('events').EventEmitter} */ (require("events").EventEmitter);
 
 class ExtensionEvents extends EventEmitter {
   static WORKSPACE_READY = "workspace_ready";

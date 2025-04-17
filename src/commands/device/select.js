@@ -42,4 +42,5 @@ events.on(ExtensionEvents.WORKSPACE_READY, loadFromWorkspace);
 
 module.exports = {
     selectDevice,
+    loadFromWorkspace,
 }

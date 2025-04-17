@@ -49,9 +49,9 @@ function testToolchainExistence(
   }
 ) {
   console.log(
-    "Testing toolchain existence, " + testExecutables
-      ? "together with"
-      : "without testing" + " executables [avr-gcc] and [avr-as]."
+    "Testing toolchain existence, " +
+      (testExecutables ? "together with" : "without testing") +
+      " executables [avr-gcc] and [avr-as]."
   );
   //   const toolchainDirectory = getToolchainDirectory();
   let binDirectory = path.join(toolchainDirectory, "bin");

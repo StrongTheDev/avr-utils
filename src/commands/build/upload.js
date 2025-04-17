@@ -1,13 +1,7 @@
 const vscode = require("vscode");
-const { spawn } = require("child_process");
 const path = require("path");
 const fs = require("fs");
-const os = require("os");
-const decompress = require("decompress");
-const { get, request } = require("https");
-const { fullMMCUDeviceList } = require("../../util/constants");
 const { getToolchainDirectory } = require("../../util/toolchain");
-const { getSelectedMMCUDevice } = require("../../core/deviceManager");
 const {
   executedWithinWorkspace,
   getWorkspaceFolderPath,
@@ -20,12 +14,14 @@ const {
 } = require("../../util/fileSystem");
 const getAvrdude = require("../tools/getAvrdude");
 const runAvrdude = require("../tools/runAvrdude");
+const { spawn } = require("child_process");
 
 /**
  * @param {ProjectSettings} projectConfig
  * @param {string} hexFilePath
  */
 async function uploadWithSavedSettings(projectConfig, hexFilePath) {
+  if (!projectConfig.uploadSettings) return false;
   let programmer = projectConfig.uploadSettings.programmer;
   let port = projectConfig.uploadSettings.port;
 
@@ -44,16 +40,22 @@ async function uploadWithSavedSettings(projectConfig, hexFilePath) {
  * @param {string} hexFilePath
  */
 async function promptAndSaveUploadSettings(projectConfig, hexFilePath) {
-  let programmer = await getProgrammer(projectConfig.uploadSettings.programmer);
+  let programmer = await getProgrammer(
+    projectConfig.uploadSettings
+      ? projectConfig.uploadSettings.programmer
+      : null
+  );
   if (!programmer) return;
 
   let port = undefined;
   if (programmer !== "usbasp") {
-    port = await getPort(projectConfig.uploadSettings.port);
+    port = await getPort(
+      projectConfig.uploadSettings ? projectConfig.uploadSettings.port : null
+    );
     if (!port) return;
   }
 
-  saveOrUpdateProjectConfig({
+  projectConfig = saveOrUpdateProjectConfig({
     uploadSettings: {
       programmer,
       ...(port && { port }),
@@ -83,9 +85,11 @@ async function uploadToMicrocontroller(withPrompt = false) {
 
     while (!projectConfig.mcu) {
       const option = await vscode.window.showWarningMessage(
-        "No microcontroller selected. Please select a microcontroller To continue.", 'Select', 'Cancel'
+        "No microcontroller selected. Please select a microcontroller To continue.",
+        "Select",
+        "Cancel"
       );
-      if (option === 'Cancel') return;
+      if (option === "Cancel") return;
       await vscode.commands.executeCommand("avr-utils.selectDevice");
       projectConfig = loadProjectConfig();
     }
@@ -116,7 +120,8 @@ async function doUpload(hexFilePath, savedSettings) {
     let avrdudePath = path.join(getToolchainDirectory(), "bin", "avrdude");
     let useSystemAvrdude = false;
 
-    if (!fs.existsSync(avrdudePath)) {
+    const exists = spawn(avrdudePath, ["-v"]);
+    exists.on("error", async () => {
       const action = await vscode.window.showWarningMessage(
         `avrdude not found at ${avrdudePath}.`,
         "Download avrdude",
@@ -126,16 +131,17 @@ async function doUpload(hexFilePath, savedSettings) {
 
       if (action === "Download avrdude") {
         await getAvrdude();
-        if (!fs.existsSync(avrdudePath)) {
-          throw new Error(`avrdude installation failed at ${avrdudePath}`);
-        }
+        const e = spawn(avrdudePath, ["-v"]);
+        e.on("error", (err) => {
+          throw new Error(`avrdude installation failed: ${err.message}`);
+        });
       } else if (action === "Try System avrdude") {
         useSystemAvrdude = true;
         avrdudePath = "avrdude";
       } else {
         return;
       }
-    }
+    });
 
     let args = ["-c", programmer, "-p", savedSettings.mcu];
     if (programmer !== "usbasp" && port) {
@@ -152,7 +158,9 @@ async function doUpload(hexFilePath, savedSettings) {
         : {};
     const fuses = {
       ...defaultFuses,
-      ...(savedSettings.uploadSettings.fuse || fuseSettings[savedSettings.mcu] || {}),
+      ...(savedSettings.uploadSettings.fuse ||
+        fuseSettings[savedSettings.mcu] ||
+        {}),
     };
 
     if (fuses.lfuse) args.push("-U", `lfuse:w:${fuses.lfuse}:m`);
@@ -194,7 +202,6 @@ async function doUpload(hexFilePath, savedSettings) {
   }
 }
 
-
 /**
  * @param {string} savedProgrammer
  */
@@ -225,11 +232,8 @@ async function getProgrammer(savedProgrammer) {
  * @param {string} savedPort
  */
 async function getPort(savedPort) {
-  const config = vscode.workspace.getConfiguration("avr-utils");
   const defaultPort =
-    savedPort ||
-    config.get("port") ||
-    (process.platform === "win32" ? "COM3" : "/dev/ttyUSB0");
+    savedPort || (process.platform === "win32" ? "COM3" : "/dev/ttyUSB0");
   const ports = [
     { label: "COM3", description: "Windows port" },
     { label: "COM4", description: "Windows port" },
@@ -250,6 +254,5 @@ async function getPort(savedPort) {
       })
     : selected?.label;
 }
-
 
 module.exports = { uploadToMicrocontroller };

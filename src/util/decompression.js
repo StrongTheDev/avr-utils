@@ -5,7 +5,6 @@ const decompressTargz = require("decompress-targz");
 const decompressUnzip = require("decompress-unzip");
 const vscode = require("vscode");
 
-
 /**
  * Extraction for zip files.
  * @param {Object} descriptor
@@ -20,8 +19,10 @@ function extractArchive(descriptor) {
     ...descriptor.decompressOptions,
   }).then(async () => {
     let result = await vscode.window.showInformationMessage(
-      descriptor.decompressSuccessMessage +
-        " Do you wish to keep or delete the downloaded file?",
+      (descriptor.decompressSuccessMessage
+        ? descriptor.decompressSuccessMessage + " "
+        : "Extraction complete. ") +
+        "Do you wish to keep or delete the downloaded file?",
       "Keep",
       "Delete"
     );
