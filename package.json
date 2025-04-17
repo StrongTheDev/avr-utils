@@ -22,7 +22,7 @@
         "onCommand:avr-utils.openMicrochipStudioProject",
         "onCommand:avr-utils.uploadToMicrocontroller"
     ],
-    "main": "./out/main.js",
+    "main": "./dist/extension.js",
     "contributes": {
         "commands": [
             {
@@ -181,7 +181,6 @@
         "typescript": "^5.8.3"
     },
     "dependencies": {
-        "adm-zip": "^0.5.16",
         "decompress": "^4.2.1",
         "decompress-targz": "^4.1.1",
         "decompress-unzip": "^4.0.1",

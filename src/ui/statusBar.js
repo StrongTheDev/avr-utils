@@ -42,23 +42,22 @@ function showOrHideStatusBarUI(isAvrcContext) {
 
 function update() {
   checkForDevice();
-
-  function checkForDevice() {
-    const device = getSelectedMMCUDevice();
-    if (device) {
-      selectDeviceButton.text = device;
-      selectDeviceButton.tooltip = `Compiling for ${device}`;
-    }
-  }
-
-  events.on(ExtensionEvents.DEVICE_SELECTED, checkForDevice);
 }
+
+function checkForDevice(device = getSelectedMMCUDevice()) {
+  if (device) {
+    selectDeviceButton.text = device;
+    selectDeviceButton.tooltip = `Compiling for ${device}`;
+  }
+}
+
 
 function cleanup() {
   buildButton.dispose();
   selectDeviceButton.dispose();
 }
 
+events.on(ExtensionEvents.DEVICE_SELECTED, checkForDevice);
 events.on(ExtensionEvents.EXTENSION_ACTIVATED, buildUp);
 events.on(ExtensionEvents.EXTENSION_DEACTIVATED, cleanup);
 events.on(ExtensionEvents.IS_AVRC_CONTEXT, showOrHideStatusBarUI);

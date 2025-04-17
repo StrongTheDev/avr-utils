@@ -1,4 +1,12 @@
-const { getWorkspaceName } = require("../../core/workspaceManager");
+const { getWorkspaceName, getWorkspaceFolderPath } = require("../../core/workspaceManager");
+const vscode = require("vscode");
+const { events, ExtensionEvents } = require("../../util/events")
+const path = require("path");
+const { redundantDirectory, currentFileExtension } = require("../../util/constants");
+const { getToolchainDirectory } = require("../../util/toolchain");
+const { getSelectedMMCUDevice } = require("../../core/deviceManager");
+const { exec } = require("child_process");
+const { generateDiagnostics, clearDiagnostics } = require("../../providers/diagnosticsProvider");
 
 async function compile() {
   const workspaceName = getWorkspaceName();
@@ -24,6 +32,7 @@ async function compile() {
     currentFileExtension() === ".c"
       ? `-x c -mmcu=${getSelectedMMCUDevice()} `
       : ""
+  // @ts-ignore
   } "${vscode.window.activeTextEditor.document.uri.fsPath}"`;
   const mainDotO = `${buildCmd} -o "${path.join(
     getWorkspaceFolderPath(),

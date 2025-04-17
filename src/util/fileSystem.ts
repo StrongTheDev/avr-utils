@@ -39,8 +39,11 @@ export class ProjectSettings {
     port?: string;
     programmer?: string;
     fuse?: object;
-    baudrate?: string;
   };
+  serialSettings?: {
+    port?: string;
+    baudrate?: string;
+  }
 }
 
 events.on(ExtensionEvents.DEVICE_SELECTED, (mcu: string, isAssembly: boolean) => {

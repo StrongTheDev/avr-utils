@@ -33,16 +33,17 @@ jobs:
         run: npm install
       
       - name: Run build script
-        run: npm run avr-utils
+        run: npx tsc
+        # run: npm run avr-utils
       
       # - name: Rename application entry file
       #   run: sed -i "s#src/extension.js#out/main.js#" package.json
       
       - name: Package Extension
-        run: node_modules/@vscode/vsce/vsce pack
+        run: npx vsce pack
       
       - name: Save artifact
         uses: actions/upload-artifact@v4
         with:
-          name: extension-latest
+          name: extension-latest-${{ github.ref_name }}
           path: "*.vsix"

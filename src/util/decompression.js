@@ -1,3 +1,4 @@
+// @ts-nocheck
 const fs = require("fs");
 const decompress = require("decompress");
 const decompressTargz = require("decompress-targz");
