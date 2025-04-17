@@ -3,7 +3,7 @@ const path = require("path");
 const fs = require("fs");
 const os = require("os");
 
-async function makeProject() {
+async function createProject() {
     const parentfolder = await vscode.window.showOpenDialog({
         canSelectFolders: true,
         canSelectFiles: false,
@@ -43,7 +43,7 @@ async function makeProject() {
     await vscode.workspace.fs.createDirectory(vscode.Uri.file(debugDir));
     await vscode.workspace.fs.createDirectory(vscode.Uri.file(vscodeDir));
 
-    fs.writeFileSync(path.join(vscodeDir, "avr_project.json"), JSON.stringify({ avrDevice: null }), "utf8");
+    fs.writeFileSync(path.join(vscodeDir, "avr_project.json"), JSON.stringify({ mcu: null }), "utf8");
     fs.writeFile(
         path.join(projectPath, "main.c"),
         `/**
@@ -78,4 +78,4 @@ int main(void) {
     }
 }
 
-module.exports = makeProject;
+module.exports = createProject;

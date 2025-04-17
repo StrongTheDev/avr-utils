@@ -9,12 +9,13 @@
                 "<node_internals>/**"
             ],
             "args": [
-                "--extensionDevelopmentPath=${workspaceFolder}"
+                "--extensionDevelopmentPath=${workspaceFolder}",
+                "--trace-warnings"
             ],
             "outFiles": [
                 "${workspaceFolder}/out/**/*.js"
             ],
-            "preLaunchTask": "npm: esbuild"
+            "preLaunchTask": "npm: avr-utils"
         }
     ]
 }

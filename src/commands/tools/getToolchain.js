@@ -1,41 +1,32 @@
 const vscode = require("vscode");
-const tar = require("tar");
-const decompress = require("decompress");
 const os = require("os");
 const fs = require("fs");
 const path = require("path");
 const { get } = require("https");
-const { dataObject } = require("../utils");
+const { extractTarball, extractZip } = require("../../util/decompression");
+const { DownloadSource } = require("../../util/download");
+const { setSetting, Setting } = require("../../services/storageService");
+// const { extensionDataStorageObject } = require("../../util/fileSystem");
+
+
 
 /**
- * @typedef ToolchainSource
- * @property {string[]} platforms - The platforms that the source supports
- * @property {string} endpoint - The endpoint to download the toolchain from, for the specified platforms
- * @property {string} streamName - The name of the file to stream/download the data into
- */
-
-/**
- * @param {NodeJS.Platform} platform - The platform to get the toolchain for.
- * @param {string} downloadsUrl - The url to download the toolchain from. It is already defined in `utils.js` 
- * @param {ToolchainSource[]} toolchainSources - The list of toolchain sources
  * @see utils.js
  */
-async function getToolchain(platform, downloadsUrl, toolchainSources) {
-    let newUrl = "";
-    let streamName = ""; // The name of the file into which we download the compressed toolchain before extraction
-    toolchainSources.forEach((source) => {
-        source.platforms.forEach((p) => {
-            if (p === platform) {
-                newUrl = downloadsUrl + source.endpoint;
-                streamName = source.streamName;
-            }
-        });
+async function getToolchain() {
+    const toolchainSource = new DownloadSource("https://ww1.microchip.com/downloads/aemDocuments/documents/DEV/ProductDocuments/SoftwareTools/");
+    toolchainSource.setFileNames({
+        "windows": "avr8-gnu-toolchain-3.7.0.1796-win32.any.x86_64.zip",
+        "mac": "avr8-gnu-toolchain-3.7.0.1796-darwin.any.x86_64.tar.gz",
+        "linux": "avr8-gnu-toolchain-3.7.0.1796-linux.any.x86_64.tar.gz",
     });
+    let streamName = "toolchain" + toolchainSource.getFileExtension(); // The name of the file into which we download the compressed toolchain before extraction
+
     vscode.window.withProgress(
-        { cancellable: true, location: vscode.ProgressLocation.Notification, title: `Downloading toolchain for ${platform}` },
+        { cancellable: true, location: vscode.ProgressLocation.Notification, title: `Downloading toolchain` },
         (progress) => {
             return new Promise((resolvePromise, rejectPromise) => {
-                get(newUrl, (response) => {
+                get(toolchainSource.getDownloadUrl(), (response) => {
                     response.pipe(fs.createWriteStream(path.join(os.homedir(), "Documents", streamName)));
 
                     const totalBytes = parseInt(response.headers["content-length"], 10); // get the file size from the header
@@ -88,19 +79,20 @@ async function getToolchain(platform, downloadsUrl, toolchainSources) {
                             }
                         }
 
-                        // Save the selected directory as the toolchain_directory so that users don't have to download the toolchain every time. 
-                        fs.readFile(path.join(__dirname, "..", "storage", "data.json"), "utf8", (err, data) => {
-                            if (err) throw err;
-                            const extension_data = JSON.parse(data);
-                            extension_data.toolchain_directory = directory;
-                            dataObject(extension_data);
-                        });
-
                         progress.report({ message: "Extracting the Toolchain" });
-                        platform.toString() === "win32"
-                            ? extractZip(`${path.join(os.homedir(), "Documents", streamName)}`, directory)
-                            : extractTarball(`${path.join(os.homedir(), "Documents", streamName)}`, directory);
-                        progress.report({ message: "Extraction complete! Happy coding!" });
+                        const filePath = path.join(os.homedir(), "Documents", streamName);
+                        const extractOptions = {
+                            filePath,
+                            directory,
+                        };
+                        toolchainSource.getFileType() === "zip"
+                            ? extractZip(extractOptions)
+                            : extractTarball(extractOptions);
+
+                        // Save the selected directory as the toolchain_directory so that users don't have to download the toolchain every time. 
+                        setSetting(Setting.TOOLCHAIN_DIRECTORY, directory, true);
+
+                        progress.report({ message: "Happy coding!" });
 
                         setTimeout(() => resolvePromise(), 2250);
                     });
@@ -114,36 +106,6 @@ async function getToolchain(platform, downloadsUrl, toolchainSources) {
         }
     )
 
-}
-
-/**
- *
- * @param {string} tarball - path to tarball
- * @param {string} directory - directory to extract to
- */
-function extractTarball(tarball, directory) {
-    fs.createReadStream(tarball)
-        .pipe(
-            tar.x({
-                C: directory,
-                strip: 1,
-            })
-        )
-        .on("finish", () => {
-            vscode.window.showInformationMessage(`Toolchain extracted to ${directory}`);
-            fs.unlinkSync(tarball);
-        });
-}
-/**
- *
- * @param {string} file - path to file
- * @param {string} directory - directory to extract to
- */
-function extractZip(file, directory) {
-    decompress(file, directory, { strip: 1 }).then(() => {
-        vscode.window.showInformationMessage(`Toolchain extracted to ${directory}`);
-        fs.unlinkSync(file);
-    });
 }
 
 module.exports = getToolchain;
