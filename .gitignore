@@ -10,3 +10,4 @@
 !out/storage/device_and_file.json
 !out/storage/.file
 .vscode/settings.json
+dist/**
