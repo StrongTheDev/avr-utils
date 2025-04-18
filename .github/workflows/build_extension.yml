@@ -45,5 +45,5 @@ jobs:
       - name: Save artifact
         uses: actions/upload-artifact@v4
         with:
-          name: extension-latest-${{ github.ref_name }}
+          name: extension-latest-${{ github.sha }}
           path: "*.vsix"
