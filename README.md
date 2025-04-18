@@ -1,3 +1,5 @@
+[![Discord Server](https://img.shields.io/discord/1359270749642424611)](https://discord.gg/QjKKyBE873) 
+
 # avr-utils README
 
 Welcome to **`avr-utils`**.
