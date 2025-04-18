@@ -1,6 +1,9 @@
+// @ts-nocheck
 const vscode = require('vscode');
 const { SerialPort } = require('serialport');
 const { ReadlineParser } = require('@serialport/parser-readline');
+const { autoDetect } = require("@serialport/bindings-cpp");
+const { saveOrUpdateProjectConfig } = require('../../util/fileSystem');
 
 let panel;
 let port;
@@ -13,6 +16,7 @@ let lastLineCountTime = 0;
 let linesPerSecond = 0;
 const UPDATE_INTERVAL = 100; // Update Webview every 100ms
 const MAX_LINES = 500; // Maximum lines in output
+
 
 async function openSerialMonitor() {
     if (panel) {
@@ -73,6 +77,7 @@ async function openSerialMonitor() {
         });
 
         if (!selectedBaudRate) return;
+        saveOrUpdateProjectConfig({serialSettings:{baudrate: selectedBaudRate}})
 
         port = new SerialPort({ path: finalPort, baudRate: parseInt(selectedBaudRate) }, (err) => {
             if (err) {
@@ -151,7 +156,7 @@ async function openSerialMonitor() {
 
 async function getSerialPorts() {
     try {
-        const ports = await SerialPort.list();
+        const ports = await autoDetect().list();
         return ports.map(p => p.path);
     } catch (err) {
         vscode.window.showErrorMessage(`Failed to list serial ports: ${err.message}`);

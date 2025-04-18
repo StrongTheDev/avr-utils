@@ -10,6 +10,6 @@ vsc-extension-quickstart.md
 folders.json
 src/**
 node_modules/**
-out/storage/data.json
+# out/storage/data.json
 #storage/data.json
 **/*.vsix

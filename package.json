@@ -18,11 +18,11 @@
     "activationEvents": [
         "onLanguage:avr-c",
         "onLanguage:asm",
-        "onCommand:avr-utils.makeProject",
+        "onCommand:avr-utils.createProject",
         "onCommand:avr-utils.openMicrochipStudioProject",
         "onCommand:avr-utils.uploadToMicrocontroller"
     ],
-    "main": "./extension.js",
+    "main": "./dist/extension.js",
     "contributes": {
         "commands": [
             {
@@ -30,25 +30,32 @@
                 "title": "AVR Utils: Open Microchip Project"
             },
             {
-                "command": "avr-utils.makeProject",
+                "command": "avr-utils.createProject",
                 "title": "AVR Utils: Create New Project"
             },
             {
                 "command": "avr-utils.compileProject",
                 "title": "AVR Utils: Build/Compile",
-                "icon": "$(debug-start)",
+                "icon": "$(play)",
                 "enablement": "resourceLangId =~ /^(avr-c|asm)$/"
             },
             {
                 "command": "avr-utils.uploadToMicrocontroller",
                 "title": "AVR Utils: Upload to Microcontroller",
-                "icon": "$(cloud-upload)",
+                "icon": "$(arrow-up)",
+                "enablement": "resourceLangId =~ /^(avr-c|asm)$/"
+            },
+            {
+                "command": "avr-utils.uploadToMicrocontroller.alt",
+                "title": "AVR Utils: Change Upload settings & Upload",
+                "icon": "$(gear)",
                 "enablement": "resourceLangId =~ /^(avr-c|asm)$/"
             },
             {
                 "command": "avr-utils.openSerialMonitor",
                 "title": "AVR Utils: Open Serial Monitor",
-                "icon": "$(terminal)"
+                "icon": "$(terminal)",
+                "enablement": "resourceLangId =~ /^(avr-c|asm)$/"
             }
         ],
         "menus": {
@@ -56,12 +63,18 @@
                 {
                     "command": "avr-utils.compileProject",
                     "group": "navigation",
-                    "when": "avr-utils.isAvrC"
+                    "when": "editorLangId =~ /^(avr-c|asm)$/"
                 },
                 {
                     "command": "avr-utils.uploadToMicrocontroller",
                     "group": "navigation",
-                    "when": "avr-utils.isAvrC"
+                    "when": "editorLangId =~ /^(avr-c|asm)$/",
+                    "alt": "avr-utils.uploadToMicrocontroller.alt"
+                },
+                {
+                    "command": "avr-utils.openSerialMonitor",
+                    "group": "navigation",
+                    "when": "editorLangId =~ /^(avr-c|asm)$/"
                 }
             ]
         },
@@ -118,6 +131,30 @@
                 "scopeName": "source.asm",
                 "path": "./syntax/asm.json"
             }
+        ],
+        "configuration": [
+            {
+                "title": "Toolchain",
+                "properties": {
+                    "avr-utils.toolchain.path": {
+                        "title": "Toolchain Path",
+                        "type": "string",
+                        "default": "~\\Documents\\AVR Utils\\toolchain",
+                        "description": "Path to the AVR toolchain. This is used to find the compiler and other tools."
+                    }
+                }
+            },
+            {
+                "title": "Miscellaneous",
+                "properties": {
+                    "avr-utils.extensionRootPath": {
+                        "type": "string",
+                        "description": "DO NOT MODIFY THIS!! The root path of the extension. This is used to find the some critical files.",
+                        "readOnly": true,
+                        "minLength": 8
+                    }
+                }
+            }
         ]
     },
     "scripts": {
@@ -125,25 +162,29 @@
         "pretest": "npm run lint",
         "test": "node ./test/runTest.js",
         "vscode:prepub": "npm run esbuild-base -- --minify",
-        "esbuild-base": "esbuild ./extension.js --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node",
+        "esbuild-base": "npm run tsc && esbuild ./dist/extension.js --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node",
         "esbuild": "npm run esbuild-base -- --sourcemap",
         "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
         "test-compile": "tsc -p ./",
-        "avr-utils": "npm run esbuild-base"
+        "avr-utils": "npm run esbuild-base",
+        "tsc": "npx tsc",
+        "pack": "npm run avr-utils && vsce pack"
     },
     "devDependencies": {
+        "@types/decompress": "^4.2.7",
         "@types/node": "18.x",
         "@types/vscode": "^1.60.0",
         "@vscode/test-electron": "^2.3.4",
         "@vscode/vsce": "^2.22.0",
         "esbuild": "^0.25.2",
-        "eslint": "^8.50.0"
+        "eslint": "^8.50.0",
+        "typescript": "^5.8.3"
     },
     "dependencies": {
-        "adm-zip": "^0.5.16",
         "decompress": "^4.2.1",
-        "serialport": "^13.0.0",
-        "tar": "^6.2.0"
+        "decompress-targz": "^4.1.1",
+        "decompress-unzip": "^4.0.1",
+        "serialport": "^13.0.0"
     },
     "authors": [
         {
