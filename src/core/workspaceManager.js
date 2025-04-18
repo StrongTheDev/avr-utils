@@ -62,21 +62,22 @@ async function processWorkspaceChange() {
   if (!folders) {
     activeWorkspace = null;
     events.emit(ExtensionEvents.WORKSPACE_UNLOADED);
-    return;
+    return false;
   }
   // select first folder in workspace if any is left
   if (!activeWorkspace && folders.length == 1) {
     activeWorkspace = folders[0];
     events.emit(ExtensionEvents.WORKSPACE_READY, activeWorkspace);
-    return;
+    return true;
   } else if (!folders.includes(activeWorkspace)) {
     const wsp = await selectWorkspace();
     if (wsp) {
       activeWorkspace = wsp;
       events.emit(ExtensionEvents.WORKSPACE_READY, activeWorkspace);
-      return;
+      return true;
     }
   }
+  return false;
 }
 
 ////////////////////////////////////////////

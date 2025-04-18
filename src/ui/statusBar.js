@@ -51,7 +51,6 @@ function checkForDevice(device = getSelectedMMCUDevice()) {
   }
 }
 
-
 function cleanup() {
   buildButton.dispose();
   selectDeviceButton.dispose();
