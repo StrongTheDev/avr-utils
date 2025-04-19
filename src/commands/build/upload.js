@@ -12,7 +12,7 @@ const {
   saveOrUpdateProjectConfig,
   ProjectSettings,
 } = require("../../util/fileSystem");
-const getAvrdude = require("../tools/getAvrdudes");
+const getAvrdude = require("../tools/getAvrdude");
 const runAvrdude = require("../tools/runAvrdude");
 const { spawn } = require("child_process");
 
