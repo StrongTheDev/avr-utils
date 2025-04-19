@@ -9,18 +9,14 @@
     },
     "icon": "assets/icons/extension-icon.png",
     "engines": {
-        "vscode": "^1.60.0"
+        "vscode": "^1.75.0"
     },
     "categories": [
         "Programming Languages",
         "Other"
     ],
     "activationEvents": [
-        "onLanguage:avr-c",
-        "onLanguage:asm",
-        "onCommand:avr-utils.createProject",
-        "onCommand:avr-utils.openMicrochipStudioProject",
-        "onCommand:avr-utils.uploadToMicrocontroller"
+        "onLanguage:asm"
     ],
     "main": "./dist/extension.js",
     "contributes": {
@@ -55,7 +51,7 @@
                 "command": "avr-utils.openSerialMonitor",
                 "title": "AVR Utils: Open Serial Monitor",
                 "icon": "$(terminal)",
-                "enablement": "resourceLangId =~ /^(avr-c|asm)$/"
+                "enablement": "false && resourceLangId =~ /^(avr-c|asm)$/"
             }
         ],
         "menus": {
@@ -74,7 +70,7 @@
                 {
                     "command": "avr-utils.openSerialMonitor",
                     "group": "navigation",
-                    "when": "editorLangId =~ /^(avr-c|asm)$/"
+                    "when": "false && editorLangId =~ /^(avr-c|asm)$/"
                 }
             ]
         },
@@ -162,18 +158,20 @@
         "pretest": "npm run lint",
         "test": "node ./test/runTest.js",
         "vscode:prepub": "npm run esbuild-base -- --minify",
-        "esbuild-base": "npm run tsc && esbuild ./dist/extension.js --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node",
+        "esbuild-base": "esbuild ./dist/extension.js --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node",
         "esbuild": "npm run esbuild-base -- --sourcemap",
         "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
         "test-compile": "tsc -p ./",
         "avr-utils": "npm run esbuild-base",
-        "tsc": "npx tsc",
-        "pack": "npm run avr-utils && vsce pack"
+        "build": "node ./esbuild.js",
+        "pack": "vsce pack",
+        "build-pack": "npm run build && vsce pack"
     },
     "devDependencies": {
+        "@electron/rebuild": "^3.7.2",
         "@types/decompress": "^4.2.7",
         "@types/node": "18.x",
-        "@types/vscode": "^1.60.0",
+        "@types/vscode": "^1.75.0",
         "@vscode/test-electron": "^2.3.4",
         "@vscode/vsce": "^2.22.0",
         "esbuild": "^0.25.2",
@@ -181,6 +179,7 @@
         "typescript": "^5.8.3"
     },
     "dependencies": {
+        "@serialport/bindings-cpp": "^13.0.1",
         "decompress": "^4.2.1",
         "decompress-targz": "^4.1.1",
         "decompress-unzip": "^4.0.1",

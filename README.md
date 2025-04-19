@@ -29,26 +29,26 @@ New Features:
 - **Create or Import**  
   Easily create a new AVR project or import an existing one from Microchip/Atmel Studio.
 
-  ![IMAGE](assets/readme/1a-create-or-import.mp4.gif)
+  ![IMAGE](https://github.com/StrongTheDev/avr-utils/raw/main/assets/readme/1a-create-or-import.mp4.gif)
 
   - Automatically prompts for folder and project name  
   - Supports importing `.atsln` or `.cproj` projects  
   - Fully offline toolchain support (recommended)  
 
-  ![IMAGE](assets/readme/1b-project-name.mp4.gif)
+  ![IMAGE](https://github.com/StrongTheDev/avr-utils/raw/main/assets/readme/1b-project-name.mp4.gif)
 
 - **No Toolchain? No Problem**  
   You’ll be prompted to either locate an existing toolchain (e.g., from Microchip Studio) or download one directly.
 
-  ![folders](assets/readme/1c-toolchain-directory.png)  
-  ![IMAGE](assets/readme/1c-no-toolchain.mp4.gif)
+  ![folders](https://github.com/StrongTheDev/avr-utils/raw/main/assets/readme/1c-toolchain-directory.png)  
+  ![IMAGE](https://github.com/StrongTheDev/avr-utils/raw/main/assets/readme/1c-no-toolchain.mp4.gif)
 
 - **Select a Device First**  
   Pick your microcontroller before building — ensures proper header files are used.
 
-  ![IMAGE](assets/readme/1d-select-first-prompt.mp4.gif)  
-  ![IMAGE](assets/readme/1e-select-and-build.mp4.gif)  
-  ![IMAGE](assets/readme/1f-build-outputs.mp4.gif)
+  ![IMAGE](https://github.com/StrongTheDev/avr-utils/raw/main/assets/readme/1d-select-first-prompt.mp4.gif)  
+  ![IMAGE](https://github.com/StrongTheDev/avr-utils/raw/main/assets/readme/1e-select-and-build.mp4.gif)  
+  ![IMAGE](https://github.com/StrongTheDev/avr-utils/raw/main/assets/readme/1f-build-outputs.mp4.gif)
 
 ---
 
@@ -147,18 +147,18 @@ The extension now includes a Serial Monitor to communicate with your AVR microco
 - **Toolchain Headers**  
   Autocompletion works for all `avr/io.h` and other standard headers.
 
-  ![IMAGE](assets/readme/2a-completions.mp4.gif)
+  ![IMAGE](https://github.com/StrongTheDev/avr-utils/raw/main/assets/readme/2a-completions.mp4.gif)
 
 - **Header Links**  
   Clickable includes to quickly navigate your project files.
 
-  ![IMAGE](assets/readme/2b-header-links.mp4.gif)
+  ![IMAGE](https://github.com/StrongTheDev/avr-utils/raw/main/assets/readme/2b-header-links.mp4.gif)
 
 - **Register & Symbol Definitions**  
   Works for both MCU-defined symbols like `PORTB` and user-defined functions.
 
-  ![IMAGE](assets/readme/3a-definitions-from-device-headers.mp4.gif)  
-  ![IMAGE](assets/readme/3b-definitions-from-own-headers.mp4.gif)
+  ![IMAGE](https://github.com/StrongTheDev/avr-utils/raw/main/assets/readme/3a-definitions-from-device-headers.mp4.gif)  
+  ![IMAGE](https://github.com/StrongTheDev/avr-utils/raw/main/assets/readme/3b-definitions-from-own-headers.mp4.gif)
 
 ---
 
@@ -192,62 +192,4 @@ Search for **AVR Utils** in VSCode settings:
 ---
 
 ## 📦 Release Notes
-
-### 0.3.0
-
-- ✅ Added Serial Monitor feature:
-  - Displays as a Webview panel beside the active editor.
-  - Supports serial port selection and baud rate configuration.
-  - Includes a modern UI with line ending selection, start/stop monitoring, clear output, autoscroll, and data rate indicator.
-  - Throttles updates (100ms) and limits output (500 lines) for performance.
-  - Handles errors for serial port operations with user-friendly messages.
-  
-### 0.2.0
-
-- ✅ Fixed false "Upload failed" errors by improving success detection:
-  - Checks exit code, "avrdude done" message, and "bytes of flash verified"
-  - Captures full output for better diagnostics
-- 📋 Enhanced error reporting with detailed messages
-- 🔧 Maintained USBasp no-port support and fuse configurability
-- 📜 Added detailed console logging for upload results
-- 📘 Updated README with new features and improvements
-
-
-### 0.1.9
-
-- 🧩 Added cross-platform avrdude auto-download support (Windows, Linux, macOS)
-- 📦 Archive format detection with platform-specific handling (zip/tar.gz)
-- 📤 Extract logic using `decompress` or `tar.x` based on format
-- 🔐 Applied `chmod` to Unix binaries post-extraction
-- 🛠️ Fallback to system-installed `avrdude` if download skipped
-- 💾 Saved upload settings (programmer, MCU, port) with "Use Saved" prompt
-- 🔽 Expanded programmer dropdown: 13+ common types + "Custom..." option
-- 🔁 Redirect-safe download via `followRedirects()`
-- ✅ Ensures avrdude binary exists before proceeding with upload
-- 🧪 Console logs added throughout for debugging and transparency
-- 🧼 Refactored helper structure for readability and maintainability
-- 📘 README updated with full feature documentation and checklist
-
-
-### 0.1.8
-
-- 🎯 Added automatic avrdude download feature:
-  - Downloads avrdude v8.0 from GitHub (Windows/Linux/macOS)
-  - Handles HTTP 302 redirects
-  - Displays download and extraction progress
-  - Grants executable permissions where needed
-  - Confirms binary presence before upload continues
-
-### 0.0.3
-
-- Changed README to use GIFs  
-- Video assets converted to smaller GIFs
-
-### 0.0.2
-
-- Assembly support improved  
-- Custom grammar and syntax highlighting
-
-### 0.0.1
-
-- Initial release of `avr-utils`
+Check the [changelog](CHANGELOG.md) for details on updates and fixes.

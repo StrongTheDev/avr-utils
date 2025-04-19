@@ -6,7 +6,7 @@ const openMicrochipStudioProject = require("./commands/project/open");
 const {
   uploadToMicrocontroller,
 } = require("./commands/build/upload");
-const { openSerialMonitor } = require("./commands/device/serialMonitor");
+// const { openSerialMonitor } = require("./commands/device/serialMonitor");
 const { selectDevice } = require("./commands/device/select");
 const { events, ExtensionEvents } = require("./util/events");
 
@@ -27,10 +27,10 @@ function registerCommands() {
     "avr-utils.uploadToMicrocontroller.alt",
     () => {uploadToMicrocontroller(true)} // true for prompting user input first
   );
-  vscode.commands.registerTextEditorCommand(
-    "avr-utils.openSerialMonitor",
-    openSerialMonitor
-  );
+  // vscode.commands.registerTextEditorCommand(
+  //   "avr-utils.openSerialMonitor",
+  //   openSerialMonitor
+  // );
 };
 
 events.on(ExtensionEvents.EXTENSION_ACTIVATED, registerCommands);
