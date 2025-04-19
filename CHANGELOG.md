@@ -7,7 +7,7 @@ All notable changes to the "avr-utils" extension will be documented in this file
 - Updated vscode dependency to ^1.75.0
 - Reduced extension package size by moving GIFs and images to GitHub-hosted links in README
 - Updated the icon for the extension.
-- Moved recent updates to CHANGELOG.md
+- Moved all recent updates to `CHANGELOG.md` (this file)
 - Moved esbuild config into esbuild.js
 
 
@@ -18,6 +18,11 @@ All notable changes to the "avr-utils" extension will be documented in this file
 - Fixed circular dependency issues in storage and toolchain modules
 - Improved error handling and messaging throughout the extension
 - Introduced typescript into the extension
+- Improved the upload settings UI:
+  1. Select your preferred settings once and use the upload (↑) button in the menu to upload to microcontroller using avrdude.
+  2. If you wish to change settings, you can press the upload (↑) button while pressing Alt, which changes it into a gear icon (⚙️) which will allow you to change the settings.
+
+### 0.2.1
 - ✅ Added Serial Monitor feature:
   - Displays as a Webview panel beside the active editor.
   - Supports serial port selection and baud rate configuration.
