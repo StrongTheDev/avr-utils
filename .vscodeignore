@@ -13,3 +13,5 @@ node_modules/**
 # out/storage/data.json
 #storage/data.json
 **/*.vsix
+esbuild.js
+assets/readme/**
