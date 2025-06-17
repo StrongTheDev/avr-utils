@@ -38,7 +38,14 @@ async function compileProject() {
     resetIncludeDirectory();
     return;
   }
-  if (!getSelectedMMCUDevice() && currentFileExtension() === ".c") {
+  const supportedExtensions = [".c", ".cpp", ".cxx", ".s", ".asm"];
+  if (!supportedExtensions.includes(currentFileExtension())) {
+    vscode.window.showErrorMessage(
+      "Please open a file with a supported extension ('.c', '.cpp', '.cxx', '.s', '.asm')"
+    );
+    return;
+  }
+  if (!getSelectedMMCUDevice()) {
     vscode.window.showErrorMessage("Please select a device first");
     return;
   }

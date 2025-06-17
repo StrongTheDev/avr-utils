@@ -11,7 +11,7 @@ const { getToolchainIncludesDirectory } = require("../util/toolchain");
  */
 function newLinkProvider(regex, directory) {
   return vscode.languages.registerDocumentLinkProvider(
-    { scheme: "file", language: "avr-c", pattern: "**/*.{c,h}" },
+    { scheme: "file", language: "avr-c", pattern: "**/*.{c,cpp,cxx,h}" },
     {
       provideDocumentLinks: (document) => {
         const links = [];

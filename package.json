@@ -91,13 +91,16 @@
                 "id": "avr-c",
                 "extensions": [
                     ".c",
-                    ".h"
+                    ".h",
+                    ".cpp",
+                    ".cxx"
                 ],
                 "aliases": [
-                    "AVR C"
+                    "AVR C/C++"
                 ],
                 "mimetypes": [
-                    "text/x-csrc"
+                    "text/x-csrc",
+                    "text/x-c++src"
                 ],
                 "icon": {
                     "dark": "assets/icons/avr.png",
@@ -161,7 +164,7 @@
         "esbuild-base": "esbuild ./dist/extension.js --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node",
         "esbuild": "npm run esbuild-base -- --sourcemap",
         "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
-        "test-compile": "tsc -p ./",
+        "ts-compile": "tsc -p ./",
         "avr-utils": "npm run esbuild-base",
         "build": "node ./esbuild.js",
         "pack": "vsce pack",
@@ -179,6 +182,7 @@
         "typescript": "^5.8.3"
     },
     "dependencies": {
+        "@clangd/vscode-clangd": "^0.0.0",
         "@serialport/bindings-cpp": "^13.0.1",
         "decompress": "^4.2.1",
         "decompress-targz": "^4.1.1",

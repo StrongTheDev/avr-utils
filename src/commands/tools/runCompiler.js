@@ -1,12 +1,21 @@
-const { getWorkspaceName, getWorkspaceFolderPath } = require("../../core/workspaceManager");
+const {
+  getWorkspaceName,
+  getWorkspaceFolderPath,
+} = require("../../core/workspaceManager");
 const vscode = require("vscode");
-const { events, ExtensionEvents } = require("../../util/events")
+const { events, ExtensionEvents } = require("../../util/events");
 const path = require("path");
-const { redundantDirectory, currentFileExtension } = require("../../util/constants");
+const {
+  redundantDirectory,
+  currentFileExtension,
+} = require("../../util/constants");
 const { getToolchainDirectory } = require("../../util/toolchain");
 const { getSelectedMMCUDevice } = require("../../core/deviceManager");
 const { exec } = require("child_process");
-const { generateDiagnostics, clearDiagnostics } = require("../../providers/diagnosticsProvider");
+const {
+  generateDiagnostics,
+  clearDiagnostics,
+} = require("../../providers/diagnosticsProvider");
 
 async function compile() {
   const workspaceName = getWorkspaceName();
@@ -24,29 +33,45 @@ async function compile() {
       )
     );
   }
+  let compilerToUse = "";
+  switch (currentFileExtension()) {
+    case ".cpp" || ".cxx": // c++ files
+      compilerToUse = "avr-g++";
+      break;
+    case ".s" || ".asm": // assembly files
+      compilerToUse = "avr-as";
+      break;
+    default: // c files
+      compilerToUse = "avr-gcc";
+      break;
+  }
+
   const buildCmd = `"${path.join(
     getToolchainDirectory(),
     "bin",
-    currentFileExtension() === ".c" ? "avr-gcc" : "avr-as"
+    compilerToUse
   )}" ${
-    currentFileExtension() === ".c"
-      ? `-x c -mmcu=${getSelectedMMCUDevice()} `
+    compilerToUse !== "avr-as"
+      ? `${
+          compilerToUse === "avr-gcc" ? "-x c" : `-c -B "%GCCDEV" `
+        } -mmcu=${getSelectedMMCUDevice()} `
       : ""
-  // @ts-ignore
+    // @ts-ignore
   } "${vscode.window.activeTextEditor.document.uri.fsPath}"`;
-  const mainDotO = `${buildCmd} -o "${path.join(
+  // an object file i.e main.o
+  const compileObjectFile = `${buildCmd} -o "${path.join(
     getWorkspaceFolderPath(),
     redundantDirectory(),
     "Debug",
     `main.o`
   )}"`;
-  const elfCmd = `${buildCmd} -o "${path.join(
+  const buildElf = `${buildCmd} -o "${path.join(
     getWorkspaceFolderPath(),
     redundantDirectory(),
     "Debug",
     `${workspaceName}.elf`
   )}"`;
-  const hexCmd = `"${path.join(
+  const buildHex = `"${path.join(
     getToolchainDirectory(),
     "bin",
     "avr-objcopy"
@@ -63,23 +88,23 @@ async function compile() {
   )}"`;
 
   events.emit(ExtensionEvents.COMPILATION_STARTED);
-  exec(
-    `${mainDotO} && ${elfCmd} && ${hexCmd}`,
-    { windowsHide: true },
-    (err) => {
-      if (err) {
-        generateDiagnostics(err.message);
-        vscode.window.showErrorMessage(
-          "Build Failed. Check Problems tab for possible info!"
-        );
-        events.emit(ExtensionEvents.COMPILATION_FAILED);
-      } else {
-        clearDiagnostics();
-        vscode.window.showInformationMessage("Build Completed");
-        events.emit(ExtensionEvents.COMPILATION_FINISHED);
-      }
+  let fn = vscode.window.showInformationMessage
+  fn(compileObjectFile)
+  fn(buildElf)
+  const buildBinaries = `${compileObjectFile} && ${buildElf} && ${buildHex}`;
+  exec(buildBinaries, { windowsHide: true }, (err) => {
+    if (err) {
+      generateDiagnostics(err.message);
+      vscode.window.showErrorMessage(
+        "Build Failed. Check Problems tab for possible info!"
+      );
+      events.emit(ExtensionEvents.COMPILATION_FAILED);
+    } else {
+      clearDiagnostics();
+      vscode.window.showInformationMessage("Build Completed");
+      events.emit(ExtensionEvents.COMPILATION_FINISHED);
     }
-  );
+  });
 }
 
 module.exports = compile;

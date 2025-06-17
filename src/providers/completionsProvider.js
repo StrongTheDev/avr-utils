@@ -45,7 +45,7 @@ function _registerCompletions({
   end = ">",
 }) {
   return vscode.languages.registerCompletionItemProvider(
-    { language: "avr-c", pattern: "**/*.{c,h}" },
+    { language: "avr-c", pattern: "**/*.{c,cpp,cxx,h}" },
     {
       provideCompletionItems: (document, position) => {
         // Get the text of the document up to the completion position.

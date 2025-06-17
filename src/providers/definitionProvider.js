@@ -41,15 +41,40 @@ const keywords = [
   "void",
   "volatile",
   "while",
+  "class",
+  "namespace",
+  "template",
+  "constexpr",
+  "decltype",
+  "noexcept",
+  "nullptr",
+  "override",
+  "final",
+  "thread_local",
+  "alignas",
+  "alignof",
+  "static_assert",
+  "concept",
+  "consteval",
+  "constinit",
+  "co_await",
+  "co_yield",
+  "co_return",
+  "requires",
+  "typename",
+  "using",
 ];
 
 //this code here has a lot of hard coded "variable" outcomes,
 //especially at the "avrdir.forEach" loop in order to get correct filenames.
 const provider = vscode.languages.registerDefinitionProvider(
-  { scheme: "file", language: "avr-c", pattern: "**/*.{c,h}" },
+  { scheme: "file", language: "avr-c", pattern: "**/*.{c,cpp,cxx,h}" },
   {
     provideDefinition: (doc, pos) => {
       const wordBeingChecked = doc.getText(doc.getWordRangeAtPosition(pos));
+      vscode.window.showInformationMessage(
+        `Word being checked: ${wordBeingChecked}`
+      );
       if (
         Array.from(previousPINDefinitions.keys()).includes(wordBeingChecked)
       ) {
@@ -105,7 +130,7 @@ const provider = vscode.languages.registerDefinitionProvider(
         `^#\\s?define\\s+\\b${wordBeingChecked}\\b`
       );
       const funcVarRe = new RegExp(
-        `\\b(void|int|char|short|long|float|double|signed|unsigned|const|static|extern|auto|register|volatile|inline)\\b\\s*?${wordBeingChecked} .*?`
+        `\b(void|int|char|short|long|float|double|signed|unsigned|const|static|extern|auto|register|volatile|inline|class|struct|enum|typename)\b(?:\s*<.*?>)?\s*?${wordBeingChecked}(?:\s*\([^)]*\))?.*?`
       );
 
       /**@param {string[]} headerList  */
