@@ -88,9 +88,6 @@ async function compile() {
   )}"`;
 
   events.emit(ExtensionEvents.COMPILATION_STARTED);
-  let fn = vscode.window.showInformationMessage
-  fn(compileObjectFile)
-  fn(buildElf)
   const buildBinaries = `${compileObjectFile} && ${buildElf} && ${buildHex}`;
   exec(buildBinaries, { windowsHide: true }, (err) => {
     if (err) {
