@@ -2,6 +2,7 @@
 // Import the module and reference it with the alias vscode in your code below
 // eslint-disable-next-line no-unused-vars
 require("./registerCommands");
+require("./registerProviders");
 
 const vscode = require("vscode");
 const { events, ExtensionEvents } = require("./util/events");
